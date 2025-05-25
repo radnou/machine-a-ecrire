@@ -30,68 +30,38 @@ const CaractereFrappe: React.FC<CaractereFrappeProps> = ({ char }) => {
         },
       });
 
-      // --- Variante 1 : Impact plus "élastique" et enfoncement ---
-      tl.fromTo(
-        charRef.current,
-        { // État juste avant l'impact visible
-          opacity: 0,
-          scale: 0.5,      // Commence plus petit
-          y: 5,            // Vient d'un peu plus bas
-          color: "#444",   // Couleur d'encre "non pressée"
-          fontWeight: "normal",
-          // rotation: gsap.utils.random(-3, 3), // Optionnel: légère rotation initiale
-        },
-        { // Impact
-          opacity: 1,
-          scale: 1.2,      // Surdimensionnement plus important
-          y: -2,           // Remonte et "enfonce" légèrement le papier
-          fontWeight: "bold",
-          color: "#000",    // Encre noire vive à l'impact
-          duration: 0.08,   // Durée de l'impact
-          ease: "elastic.out(1, 0.4)", // Un "claquement" élastique
-          // rotation: 0, // Optionnel: revient droit
-        }
-      )
-      // Stabilisation (laisse le temps à l'effet élastique de se résoudre)
-      .to(charRef.current, {
-        scale: 1,
-        y: 0, // Assure qu'il revient bien sur la ligne de base
-        color: "#000000",
+      tl.set(charRef.current, {
+        // État initial avant toute animation (invisible)
+        opacity: 0,
+        scale: 1, // Commence à taille normale mais invisible
+        y: 0,
+        color: "#000", // Couleur d'encre finale
         fontWeight: "normal",
-        duration: 0.25, // Durée pour que l'élasticité se calme
-        ease: "power2.out",
-      });
-
-      // --- Variante 2 : Impact plus "sec" avec un text-shadow (plus subtil) ---
-      // Décommente cette partie pour tester et commente la Variante 1
-      /*
-      tl.fromTo(
-        charRef.current,
-        { // État initial
-          opacity: 0,
-          scale: 1, // Commence à taille normale mais invisible
+      })
+        .to(charRef.current, {
+          // Apparition très rapide et "impact"
+          opacity: 1,
+          scale: 1.25, // Surdimensionnement pour le "coup"
+          y: -3, // Léger soulèvement/enfoncement
+          fontWeight: "bold",
+          color: "#101010", // Encre très fraîche/foncée
+          duration: 0.06, // Impact très bref
+          ease: "power2.inOut", // Rapide et direct
+          // Optionnel : une rotation infime pour l'impact
+          // rotation: gsap.utils.random(-1.5, 1.5),
+        })
+        .to(charRef.current, {
+          // Stabilisation / "rebond" après l'impact
+          scale: 1,
           y: 0,
-        },
-        { // Impact
-          opacity: 1,
-          scale: 1, // Pas de changement de taille, mais...
-          duration: 0.03, // Extrêmement rapide
-          ease: "none",
-          // Simuler un léger "enfoncement" avec une ombre très brève
-          textShadow: "0px 1px 1px rgba(0,0,0,0.5)", 
-          color: "#111",
-          fontWeight: "bold",
-        }
-      )
-      // Stabilisation
-      .to(charRef.current, {
-        textShadow: "none", // Enlève l'ombre
-        color: "#000000",
-        fontWeight: "normal",
-        duration: 0.1,
-        ease: "power1.out",
-      });
-      */
+          fontWeight: "normal",
+          color: "#000000", // Couleur d'encre finale
+          // rotation: 0, // Remettre la rotation à 0 si utilisée
+          duration: 0.3, // Laisser un peu de temps pour se stabiliser
+          ease: "elastic.out(1, 0.6)", // Effet élastique pour la stabilisation
+        });
+
+    
     }
   }, []);
 

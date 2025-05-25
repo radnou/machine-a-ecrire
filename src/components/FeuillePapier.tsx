@@ -226,11 +226,11 @@ const FeuillePapier: React.FC = () => {
             style={{
               left: `${FIXED_CURSOR_VIEWPORT_X_PERCENT}%`,
               top: `${FIXED_CURSOR_VIEWPORT_Y_PERCENT}%`,
-              width: `${charWidth}px`, // Utilise charWidth mesuré
-              height: `${lineHeight * 0.85}px`,
-              backgroundColor: "rgba(255, 0, 0, 0.6)", // Modifié pour le rendre plus visible
-              transform: "translateX(-50%)",
-              zIndex: 10, // Pour être sûr qu'il est au-dessus du papier
+              width: `${charWidth}px`, // Largeur d'un caractère
+              height: `${lineHeight * 0.85}px`, // Hauteur un peu moins que la ligne
+              backgroundColor: "#1A1A1A", // Couleur encre
+              transform: "translateX(-50%) translateY(-2px)", // Ajuste pour un meilleur centrage visuel
+              // Ajoute une opacité pour le clignotement si géré par JS, sinon gère avec la classe CSS
             }}
           />
         )}

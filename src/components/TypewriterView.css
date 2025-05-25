@@ -1,14 +1,16 @@
 /* Styles Globaux pour la page et la police de base */
 body {
     margin: 0;
-    background-color: #333; /* Fond sombre pour que la "machine" ressorte */
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    font-family: "Courier Prime", "Courier New", Courier, monospace; /* Police par défaut pour l'app */
-    /* La taille de police de base peut être définie ici ou sur html pour que les 'rem' fonctionnent partout */
-    font-size: 16px; /* Base pour les unités rem - ajuste si besoin */
+    font-family: "Courier Prime", "Courier New", Courier, monospace;
+    background-color: #383838; /* Couleur de base un peu plus claire */
+    background-image: radial-gradient(ellipse at center, 
+                                      rgba(80, 80, 80, 0.8) 0%, 
+                                      #383838 70%); /* Centre plus clair, bords plus sombres */
+    font-size: 16px;
   }
   
   /* Le "Viewport" ou la "fenêtre" de la machine à écrire */
@@ -53,9 +55,12 @@ body {
   
   /* Feuille de papier mobile */
   .paper-sheet {
-    background-color: #fdfdf8; /* Couleur du papier */
-    /* Width, height, padding et transform sont appliqués en JS pour être dynamiques */
-    
+    background:
+    linear-gradient(rgba(0,0,0,0.02) 1px, transparent 1px), /* Fines lignes horizontales (optionnel) */
+    linear-gradient(90deg, rgba(0,0,0,0.02) 1px, transparent 1px), /* Fines lignes verticales (optionnel) */
+    #f9f9f5; /* Couleur de papier légèrement différente */
+  background-size: 3px 3px, 3px 3px, 100% 100%; /* Taille pour les lignes de la grille */
+
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2) inset, /* Ombre intérieure pour effet de papier */
                 0 2px 5px rgba(0,0,0,0.1); /* Petite ombre portée pour détacher du fond */
     border: 1px solid #ccc; /* Bordure très subtile de la feuille */
@@ -120,3 +125,21 @@ body {
      width: 0.5em; /* Si tu veux forcer la largeur de l'espace */
     /* ou simplement &nbsp; qui prendra la largeur d'un caractère normal avec white-space: pre; */
   }
+  .fixed-cursor-overlay {
+    position: absolute;
+    /* Les left, top, width, height, backgroundColor sont gérés en JS dans FeuillePapier.tsx
+       pour utiliser charWidth et lineHeight mesurés et permettre le clignotement.
+       On peut mettre ici des valeurs de fallback ou des styles de base non-dynamiques.
+    */
+    background-color: #222; /* Couleur d'encre pour un curseur bloc par défaut */
+    z-index: 10;
+    pointer-events: none;
+    /* Clignotement (peut être géré en JS ou en CSS) */
+    /* animation: blink-cursor 1s step-start infinite; */
+  }
+  
+   @keyframes blink-cursor {
+    50% {
+      opacity: 0;
+    }
+  } 
