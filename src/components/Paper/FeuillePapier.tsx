@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import CaractereFrappe from "../CaractereFrappe";
-import "./PaperStyles.css";
+import "./FeuillePapier.css";
 
 const CHARACTER_WIDTH_ESTIMATE_PX = 10.5;
 const LINE_HEIGHT_PX = 28;
 const PAPER_INITIAL_PADDING_PX = 40;
 
-const PAPER_CONTENT_CHARS_WIDE = 120;
+const PAPER_CONTENT_CHARS_WIDE = 70;
 const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25;
 
 const FIXED_CURSOR_VIEWPORT_X_PERCENT = 50;
@@ -17,12 +17,20 @@ const BELL_SOUND_SRC = "/sounds/typewriter-bell.mp3";
 const bellSound =
   typeof Audio !== "undefined" ? new Audio(BELL_SOUND_SRC) : null;
 
-interface CharObject {
+export interface CharObject {
   id: string;
   char: string;
 }
 
-const FeuillePapier: React.FC = () => {
+export interface FeuillePapierProps {
+  initialContent?: string;
+  onTextChange?: (allLines: CharObject[][]) => void;
+}
+
+const FeuillePapier: React.FC<FeuillePapierProps> = ({
+  initialContent,
+  onTextChange,
+}) => {
   const mainContentRef = useRef<HTMLDivElement>(null);
   const measureCharRef = useRef<HTMLSpanElement>(null);
   const measureLineRef = useRef<HTMLDivElement>(null);
@@ -123,7 +131,10 @@ const FeuillePapier: React.FC = () => {
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       event.preventDefault();
-      const currentLineChars = allLines[currentLineIndex] || [];
+
+      let newAllLinesState = allLines.map((line) => [...line]);
+      let currentLineChars = newAllLinesState[currentLineIndex] || [];
+
       let newInsertionX = currentTextInsertionPoint.x;
       let newInsertionY = currentTextInsertionPoint.y;
 
@@ -136,15 +147,13 @@ const FeuillePapier: React.FC = () => {
           id: `char-${Date.now()}-${Math.random()}`,
           char: event.key,
         };
-        const newLineContent = [...currentLineChars, newChar];
-        const newAllLines = [...allLines];
-        newAllLines[currentLineIndex] = newLineContent;
-        setAllLines(newAllLines);
+        currentLineChars.push(newChar);
+        newAllLinesState[currentLineIndex] = currentLineChars;
 
         newInsertionX += charWidth;
         setPaperSheetX((prevX) => prevX - charWidth);
 
-        const charsOnCurrentLine = newLineContent.length;
+        const charsOnCurrentLine = currentLineChars.length;
         if (
           !bellRungForThisLine &&
           charsOnCurrentLine >= PAPER_CONTENT_CHARS_WIDE - CHARS_IN_BELL_ZONE &&
@@ -162,15 +171,13 @@ const FeuillePapier: React.FC = () => {
         }
       } else if (event.key === "Backspace") {
         if (currentLineChars.length > 0) {
-          const newLineContent = currentLineChars.slice(0, -1);
-          const newAllLines = [...allLines];
-          newAllLines[currentLineIndex] = newLineContent;
-          setAllLines(newAllLines);
+          currentLineChars.pop();
+          newAllLinesState[currentLineIndex] = currentLineChars;
 
           newInsertionX -= charWidth;
           setPaperSheetX((prevX) => prevX + charWidth);
 
-          const charsOnCurrentLine = newLineContent.length;
+          const charsOnCurrentLine = currentLineChars.length;
           if (
             bellRungForThisLine &&
             charsOnCurrentLine < PAPER_CONTENT_CHARS_WIDE - CHARS_IN_BELL_ZONE
@@ -180,7 +187,7 @@ const FeuillePapier: React.FC = () => {
         }
       } else if (event.key === "Enter") {
         setCurrentLineIndex((prevIndex) => prevIndex + 1);
-        setAllLines((prevLines) => [...prevLines, []]);
+        newAllLinesState = [...newAllLinesState, []];
 
         newInsertionX = 0;
         newInsertionY += lineHeight;
@@ -201,7 +208,13 @@ const FeuillePapier: React.FC = () => {
         }
         setBellRungForThisLine(false);
       }
+
+      setAllLines(newAllLinesState);
       setCurrentTextInsertionPoint({ x: newInsertionX, y: newInsertionY });
+
+      if (onTextChange) {
+        onTextChange(newAllLinesState);
+      }
     },
     [
       allLines,
@@ -211,8 +224,68 @@ const FeuillePapier: React.FC = () => {
       lineHeight,
       currentTextInsertionPoint,
       mainContentRef,
+      onTextChange,
     ]
   );
+
+  useEffect(() => {
+    if (initialContent) {
+      const lines = initialContent.split("\n");
+      const newAllLinesData: CharObject[][] = lines.map((line) =>
+        line.split("").map((char) => ({
+          id: `loaded-${Date.now()}-${Math.random()}`,
+          char,
+        }))
+      );
+      setAllLines(newAllLinesData);
+
+      const lastLineIndex = newAllLinesData.length - 1;
+      const lastLineLength = newAllLinesData[lastLineIndex]?.length || 0;
+
+      setCurrentLineIndex(lastLineIndex);
+      const initialInsertionY = lastLineIndex * lineHeight;
+      const initialInsertionX = lastLineLength * charWidth;
+      setCurrentTextInsertionPoint({
+        x: initialInsertionX,
+        y: initialInsertionY,
+      });
+
+      if (mainContentRef.current) {
+        const mainContentWidth = mainContentRef.current.clientWidth;
+        const typingPointXInArea =
+          (mainContentWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
+        const initialPaperX =
+          typingPointXInArea - PAPER_INITIAL_PADDING_PX - initialInsertionX;
+        setPaperSheetX(initialPaperX);
+
+        const mainContentHeight = mainContentRef.current.clientHeight;
+        const typingPointYInArea =
+          (mainContentHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
+        const initialPaperY =
+          typingPointYInArea - PAPER_INITIAL_PADDING_PX - initialInsertionY;
+        setPaperSheetY(initialPaperY);
+      }
+      if (onTextChange) {
+        onTextChange(newAllLinesData);
+      }
+    } else {
+      setAllLines([[]]);
+      setCurrentLineIndex(0);
+      setCurrentTextInsertionPoint({ x: 0, y: 0 });
+      if (mainContentRef.current) {
+        // Position initial du papier vide
+        const mainContentWidth = mainContentRef.current.clientWidth;
+        const typingPointXInArea =
+          (mainContentWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
+        setPaperSheetX(typingPointXInArea - PAPER_INITIAL_PADDING_PX);
+
+        const mainContentHeight = mainContentRef.current.clientHeight;
+        const typingPointYInArea =
+          (mainContentHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
+        setPaperSheetY(typingPointYInArea - PAPER_INITIAL_PADDING_PX);
+      }
+    }
+  }, [initialContent, charWidth, lineHeight, mainContentRef, onTextChange]);
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
