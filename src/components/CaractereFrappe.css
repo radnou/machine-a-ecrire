@@ -1,0 +1,10 @@
+.caractere-frappe {
+    display: inline-block; /* Important pour que GSAP puisse animer transform */
+    color: #000; /* Couleur d'encre par défaut */
+    /* On peut ajouter des effets de texture d'encre ici plus tard */
+  }
+  
+  .caractere-frappe.space {
+    /* Assure que l'espace a une largeur et n'est pas collapsé */
+    /* width: 0.5em;  Si on veut forcer une largeur pour l'espace */
+  }

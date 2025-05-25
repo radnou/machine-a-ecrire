@@ -1,0 +1,36 @@
+.feuille-papier {
+    background-color: #fdfdf8; /* Couleur papier légèrement crème */
+    padding: 40px;
+    font-family: 'Courier Prime', 'Courier New', Courier, monospace; /* Police machine à écrire */
+    min-height: 100vh; /* Prend toute la hauteur */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    line-height: 1.8; /* Espacement des lignes typique machine à écrire */
+    font-size: 1.1rem;
+    overflow: hidden; /* Pour le mouvement du chariot plus tard */
+  }
+  
+  .zone-texte {
+    /* Pour l'instant, simple. On gérera le 'chariot' ici plus tard */
+    white-space: pre-wrap; /* Conserve les espaces et les sauts de ligne */
+    word-wrap: break-word;
+  }
+  
+  .cursor {
+    /* animation: blink 1s step-start infinite; Clignotement CSS si on ne le fait pas en JS */
+    background-color: #333;
+    display: inline-block;
+    width: 8px; /* Ajuster la largeur du curseur */
+    margin-left: 1px;
+    /* Pour que le curseur soit bien aligné avec le texte */
+    vertical-align: bottom;
+    position: relative;
+    top: -2px; /* Ajustement fin de la position verticale */
+  }
+  
+  /* Si vous voulez un clignotement purement CSS pour le curseur:
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+  */
