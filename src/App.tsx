@@ -1,12 +1,12 @@
+// src/App.tsx
 import React from "react";
 import FeuillePapier from "./components/FeuillePapier";
-// import './App.css'; // Tu peux garder ou supprimer ce CSS par défaut
+import "./App.css"; // Charger les styles globaux (ceux de typewriter-viewport etc.)
 
 function App() {
   return (
-    <div className="App">
-      <FeuillePapier />
-    </div>
+    // Le body est déjà stylé pour centrer, donc App peut être simple
+    <FeuillePapier />
   );
 }
 

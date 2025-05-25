@@ -1,0 +1,92 @@
+/* Optionnel: Styles pour le corps de l'application si besoin */
+body {
+  margin: 0;
+  background-color: #333; /* Fond sombre pour que la machine ressorte */
+  display: flex;
+  justify-content: center; /* Centre le viewport horizontalement */
+  align-items: center; /* Centre le viewport verticalement (si hauteur fixée) */
+  min-height: 100vh;
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+}
+
+.typewriter-viewport {
+  width: 90vw; /* Prenons 90% de la largeur de la vue */
+  max-width: 800px; /* Limite maximale pour ne pas être trop large */
+  height: 80vh; /* 80% de la hauteur de la vue */
+  max-height: 600px;
+  background-color: #5a5a5a; /* Couleur du corps de la machine */
+  border: 1px solid #444;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), inset 0 0 10px rgba(0, 0, 0, 0.3);
+  position: relative; /* Contexte de positionnement pour le papier et le curseur */
+  overflow: hidden; /* TRÈS IMPORTANT : Cache les parties du papier qui dépassent */
+  border-radius: 8px; /* Bords arrondis pour la machine */
+  display: flex; /* Utile si on veut centrer le papier d'une autre manière */
+  justify-content: center; /* Centre le papier si plus petit */
+  align-items: center; /* Centre le papier si plus petit */
+}
+
+/* Curseur fixe, superposé au-dessus du papier */
+.fixed-cursor-overlay {
+  position: absolute;
+  /* Positionner le curseur au centre horizontal et à ~1/3 vertical du viewport */
+  left: 50%;
+  top: 30%;
+  transform: translateX(
+    -50%
+  ); /* Pour un vrai centrage horizontal du curseur lui-même */
+  width: 2px; /* Curseur plus fin type "I-beam" ou bloc */
+  height: 1.5rem; /* Hauteur du curseur (ajuster à la taille de la police) */
+  background-color: rgba(
+    255,
+    0,
+    0,
+    0.7
+  ); /* Curseur rouge vif pour bien le voir */
+  z-index: 10; /* S'assurer qu'il est au-dessus du papier */
+  pointer-events: none; /* Pour ne pas intercepter les clics */
+  /* Pour un curseur bloc :
+    width: 10.5px; // CHARACTER_WIDTH_ESTIMATE
+    background-color: #111;
+    */
+}
+
+.paper-sheet {
+  /* Dimensions du papier - à calculer en JS ou fixer */
+  /* Exemple : width: 600px; height: 800px; */
+  background-color: #fdfdf8; /* Couleur papier */
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.3) inset; /* Ombre intérieure pour effet de profondeur */
+  border: 1px solid #ccc; /* Bordure subtile pour la feuille */
+  position: relative; /* Pour la ligne de marge */
+  /* La transformation sera appliquée via le style en ligne depuis React */
+  transition: transform 0.08s linear; /* Transition pour le mouvement du papier */
+  padding: 20px; /* Marges intérieures du papier où le texte n'ira pas directement */
+  box-sizing: border-box;
+  /* Les polices sont définies au niveau du contenu textuel */
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  white-space: pre; /* Important pour que les espaces en début de ligne soient conservés */
+}
+
+/* Ligne de marge sur le papier */
+.paper-sheet::after {
+  content: "";
+  position: absolute;
+  top: 20px; /* Alignée avec le padding du papier */
+  bottom: 20px;
+  /* Positionnée depuis le bord droit du contenu du PAPIER */
+  /* Si PAPER_PADDING_PX est 20px, et on veut 10 caractères de marge (10 * 10.5px = 105px)
+       la ligne sera à 20px (padding papier) + 105px du bord droit physique du papier-sheet.
+       OU plus simple: à X pixels du bord droit du papier-sheet.
+       Ex: 60px du bord droit du div paper-sheet
+    */
+  right: 50px;
+  width: 1px;
+  background-color: rgba(200, 0, 0, 0.4);
+}
+
+.paper-line {
+  min-height: 1.8rem; /* Hauteur de ligne (doit correspondre à line-height * font-size) */
+  /* white-space: pre-wrap; Inutile si .paper-sheet a white-space: pre */
+  /* word-wrap: break-word; */
+}
