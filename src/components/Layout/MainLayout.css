@@ -1,62 +1,144 @@
+/* src/components/Layout/MainLayout.css */
+
 .main-layout {
   display: grid;
-  grid-template-columns: 240px 1fr auto; /* LeftSidebar, MainContent, RightSidebar (auto pour s'adapter au contenu ou être cachée) */
-  grid-template-rows: 50px 1fr 30px; /* TopMenu, MainContent+Sidebars, BottomBar */
+  grid-template-rows: 50px 1fr 30px;
   grid-template-areas:
     "top-menu top-menu top-menu"
     "left-sidebar main-content right-sidebar"
     "bottom-bar bottom-bar bottom-bar";
   height: 100vh;
   width: 100vw;
-  overflow: hidden; /* Empêche le débordement global */
-  background-color: #f0f0f0; /* Un fond clair pour l'application globale */
+  overflow: hidden;
+  background-color: #f0f0f0;
+  transition: grid-template-columns 0.3s ease-in-out;
 }
 
 .layout-top-menu {
   grid-area: top-menu;
-  background-color: #e0e0e0; /* Placeholder color */
+  background-color: #e0e0e0;
   border-bottom: 1px solid #cccccc;
   display: flex;
   align-items: center;
-  padding: 0 15px;
+  padding: 0 10px;
+  justify-content: space-between;
+  height: 50px;
+  box-sizing: border-box;
+}
+
+.layout-top-menu button {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px 8px;
+  margin: 0 2px;
+  border-radius: 4px;
+  line-height: 1; 
+}
+
+.layout-top-menu button:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+
+.file-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.sidebar-toggles {
+  display: flex;
+}
+
+.layout-left-sidebar,
+.layout-right-sidebar {
+  background-color: #f7f7f7;
+  padding: 15px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease-in-out, 
+              padding-left 0.3s ease-in-out, 
+              padding-right 0.3s ease-in-out, 
+              opacity 0.2s ease-in-out 0.05s,
+              border-width 0.3s ease-in-out;
+  opacity: 1;
+  box-sizing: border-box;
 }
 
 .layout-left-sidebar {
   grid-area: left-sidebar;
-  background-color: #f7f7f7; /* Placeholder color */
+  width: 240px;
   border-right: 1px solid #cccccc;
-  padding: 15px;
-  overflow-y: auto; /* Si le contenu dépasse */
-}
-
-.layout-main-content {
-  grid-area: main-content;
-  background-color: #ffffff; /* La "page blanche" principale */
-  padding: 20px;
-  overflow-y: auto; /* Permet le défilement du contenu principal si nécessaire */
-  display: flex; /* Pour centrer le futur "éditeur" ou "feuille de papier" */
-  flex-direction: column; /* Pour que le contenu s'empile verticalement */
-  /* align-items: center; */ /* Si tu veux centrer horizontalement le contenu de cette zone */
 }
 
 .layout-right-sidebar {
   grid-area: right-sidebar;
-  background-color: #f7f7f7; /* Placeholder color */
+  width: 200px;
   border-left: 1px solid #cccccc;
-  padding: 15px;
-  overflow-y: auto;
-  width: 200px; /* Largeur par défaut, peut être ajustable plus tard */
-  /* Cacher par défaut si vide, ou la logique JS peut le faire */
-  /* display: none;  */
+}
+
+.layout-left-sidebar.hidden,
+.layout-right-sidebar.hidden {
+  width: 0;
+  padding-left: 0;
+  padding-right: 0;
+  opacity: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+}
+
+.sidebar-section h4 {
+  margin-top: 0;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.sidebar-section ul {
+  list-style-type: none;
+  padding-left: 5px;
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.sidebar-section li {
+  padding: 4px 0;
+  cursor: default;
+}
+
+.layout-main-content {
+  grid-area: main-content;
+  background-color: #ffffff;
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease-in-out;
 }
 
 .layout-bottom-bar {
   grid-area: bottom-bar;
-  background-color: #e0e0e0; /* Placeholder color */
+  background-color: #e0e0e0;
   border-top: 1px solid #cccccc;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 15px;
   font-size: 0.8rem;
+  height: 30px;
+  color: #444;
+  box-sizing: border-box;
+}
+
+.stats {
+  display: flex;
+  gap: 5px;
+}
+
+.stat-divider {
+  margin: 0 5px;
+  color: #aaa;
+}
+
+.time-spent {
+  /* Styles si besoin */
 }
