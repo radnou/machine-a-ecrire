@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import CaractereFrappe from "./CaractereFrappe";
-import "./TypewriterView.css"; // Assure-toi que c'est le bon fichier CSS
+import "./TypewriterView.css";
 
-const CHARACTER_WIDTH_ESTIMATE_PX = 10.5; // Sera mesuré
-const LINE_HEIGHT_PX = 28; // Sera mesuré
+const CHARACTER_WIDTH_ESTIMATE_PX = 10.5;
+const LINE_HEIGHT_PX = 28;
 const PAPER_INITIAL_PADDING_PX = 40;
 
-const PAPER_CONTENT_CHARS_WIDE = 70; // Largeur FIXE du contenu du papier en caractères
+const PAPER_CONTENT_CHARS_WIDE = 70;
 const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25;
 
 const FIXED_CURSOR_VIEWPORT_X_PERCENT = 50;
@@ -30,9 +30,6 @@ const FeuillePapier: React.FC = () => {
   const [charWidth, setCharWidth] = useState(CHARACTER_WIDTH_ESTIMATE_PX);
   const [lineHeight, setLineHeight] = useState(LINE_HEIGHT_PX);
 
-  // paperContentCharsWide est maintenant une constante (ou pourrait être un état si on veut le changer via des options)
-  // Pour l'instant, c'est la constante PAPER_CONTENT_CHARS_WIDE définie ci-dessus.
-
   const paperContentWidthPx = PAPER_CONTENT_CHARS_WIDE * charWidth;
   const paperSheetWidthPx = paperContentWidthPx + 2 * PAPER_INITIAL_PADDING_PX;
   const paperContentHeightPx = PAPER_CONTENT_LINES_HIGH_DEFAULT * lineHeight;
@@ -48,19 +45,16 @@ const FeuillePapier: React.FC = () => {
   const [cursorBlinkVisible, setCursorBlinkVisible] = useState(true);
   const [bellRungForThisLine, setBellRungForThisLine] = useState(false);
 
-  const getInitialPaperXForNewLine = useCallback(() => {
-    if (viewportRef.current) {
-      const viewportWidth = viewportRef.current.offsetWidth;
-      const typingPointXInViewport =
-        (viewportWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
-      return typingPointXInViewport - PAPER_INITIAL_PADDING_PX;
-    }
-    return 0;
-  }, [viewportRef]);
+  const [currentTextInsertionPoint, setCurrentTextInsertionPoint] = useState({
+    x: 0,
+    y: 0,
+  });
 
   useEffect(() => {
+    let didCancel = false;
     const calculateDimensionsAndPosition = () => {
       if (
+        !didCancel &&
         viewportRef.current &&
         measureCharRef.current &&
         measureLineRef.current
@@ -68,51 +62,80 @@ const FeuillePapier: React.FC = () => {
         const measuredCharWidth = measureCharRef.current.offsetWidth;
         const measuredLineHeight = measureLineRef.current.offsetHeight;
 
-        let charW =
-          measuredCharWidth > 0
-            ? measuredCharWidth
-            : CHARACTER_WIDTH_ESTIMATE_PX;
-        let lineH =
-          measuredLineHeight > 0 ? measuredLineHeight : LINE_HEIGHT_PX;
+        const newCharW = measuredCharWidth > 0 ? measuredCharWidth : charWidth;
+        const newLineH =
+          measuredLineHeight > 0 ? measuredLineHeight : lineHeight;
 
-        setCharWidth(charW);
-        setLineHeight(lineH);
+        if (newCharW !== charWidth) setCharWidth(newCharW);
+        if (newLineH !== lineHeight) setLineHeight(newLineH);
 
+        const viewportWidth = viewportRef.current.offsetWidth;
         const viewportHeight = viewportRef.current.offsetHeight;
+        const typingPointXInViewport =
+          (viewportWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
         const typingPointYInViewport =
           (viewportHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
 
-        const initialX = getInitialPaperXForNewLine();
-        const initialY = typingPointYInViewport - PAPER_INITIAL_PADDING_PX;
+        const newPaperX =
+          typingPointXInViewport -
+          PAPER_INITIAL_PADDING_PX -
+          currentTextInsertionPoint.x;
+        const newPaperY =
+          typingPointYInViewport -
+          PAPER_INITIAL_PADDING_PX -
+          currentTextInsertionPoint.y;
 
-        setPaperSheetX(initialX);
-        setPaperSheetY(initialY);
+        setPaperSheetX(newPaperX);
+        setPaperSheetY(newPaperY);
       }
     };
 
-    calculateDimensionsAndPosition(); // Appel initial
-    // Une seule fois suffit si la taille de la police de base ne change pas,
-    // ou si le recalcul de charW/lineH suffit.
-    // Si PAPER_CONTENT_CHARS_WIDE devait changer avec la taille du viewport, alors l'écouteur resize serait plus critique ici.
-    // Pour une largeur de papier fixe, on peut même enlever l'écouteur resize si le point de frappe % est stable.
-    // Gardons-le pour l'instant au cas où la taille de police de base changerait dynamiquement (zoom navigateur).
+    const runInitialCalculations = () => {
+      if (measureCharRef.current && measureLineRef.current) {
+        const measuredCharWidth = measureCharRef.current.offsetWidth;
+        const measuredLineHeight = measureLineRef.current.offsetHeight;
+        if (
+          measuredCharWidth > 0 &&
+          charWidth !== measuredCharWidth &&
+          !didCancel
+        ) {
+          setCharWidth(measuredCharWidth);
+        }
+        if (
+          measuredLineHeight > 0 &&
+          lineHeight !== measuredLineHeight &&
+          !didCancel
+        ) {
+          setLineHeight(measuredLineHeight);
+        }
+      }
+      // Calculate position after a tick to ensure charWidth/lineHeight might have updated
+      setTimeout(() => {
+        if (!didCancel) calculateDimensionsAndPosition();
+      }, 0);
+    };
+
+    runInitialCalculations();
     window.addEventListener("resize", calculateDimensionsAndPosition);
-    return () =>
+
+    return () => {
+      didCancel = true;
       window.removeEventListener("resize", calculateDimensionsAndPosition);
-  }, [getInitialPaperXForNewLine]); // Retiré charWidth et lineHeight pour éviter boucle si valeurs par défaut utilisées
+    };
+  }, [charWidth, lineHeight, currentTextInsertionPoint, viewportRef]);
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
       event.preventDefault();
       const currentLineChars = allLines[currentLineIndex] || [];
+      let newInsertionX = currentTextInsertionPoint.x;
+      let newInsertionY = currentTextInsertionPoint.y;
 
       if (event.key.length === 1) {
         if (currentLineChars.length >= PAPER_CONTENT_CHARS_WIDE) {
-          // Utilise la constante
-          console.log("Fin de ligne atteinte (max chars), input bloqué.");
+          console.log("Fin de ligne atteinte, input bloqué.");
           return;
         }
-
         const newChar: CharObject = {
           id: `char-${Date.now()}-${Math.random()}`,
           char: event.key,
@@ -122,6 +145,7 @@ const FeuillePapier: React.FC = () => {
         newAllLines[currentLineIndex] = newLineContent;
         setAllLines(newAllLines);
 
+        newInsertionX += charWidth;
         setPaperSheetX((prevX) => prevX - charWidth);
 
         const charsOnCurrentLine = newLineContent.length;
@@ -147,6 +171,7 @@ const FeuillePapier: React.FC = () => {
           newAllLines[currentLineIndex] = newLineContent;
           setAllLines(newAllLines);
 
+          newInsertionX -= charWidth;
           setPaperSheetX((prevX) => prevX + charWidth);
 
           const charsOnCurrentLine = newLineContent.length;
@@ -160,19 +185,37 @@ const FeuillePapier: React.FC = () => {
       } else if (event.key === "Enter") {
         setCurrentLineIndex((prevIndex) => prevIndex + 1);
         setAllLines((prevLines) => [...prevLines, []]);
-        setPaperSheetX(getInitialPaperXForNewLine());
-        setPaperSheetY((prevY) => prevY - lineHeight);
+
+        newInsertionX = 0;
+        newInsertionY += lineHeight;
+
+        if (viewportRef.current) {
+          const viewportWidth = viewportRef.current.offsetWidth;
+          const typingPointXInViewport =
+            (viewportWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
+          const targetPaperX =
+            typingPointXInViewport - PAPER_INITIAL_PADDING_PX;
+          setPaperSheetX(targetPaperX);
+
+          const viewportHeight = viewportRef.current.offsetHeight;
+          const typingPointYInViewport =
+            (viewportHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
+          const targetPaperY =
+            typingPointYInViewport - PAPER_INITIAL_PADDING_PX - newInsertionY;
+          setPaperSheetY(targetPaperY);
+        }
         setBellRungForThisLine(false);
       }
+      setCurrentTextInsertionPoint({ x: newInsertionX, y: newInsertionY });
     },
     [
       allLines,
       currentLineIndex,
       bellRungForThisLine,
-      getInitialPaperXForNewLine,
       charWidth,
       lineHeight,
-      // paperContentCharsWide n'est plus un état, donc plus une dépendance ici
+      currentTextInsertionPoint,
+      viewportRef,
     ]
   );
 
