@@ -1,13 +1,13 @@
-// src/components/FeuillePapier.tsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import CaractereFrappe from "./CaractereFrappe";
-// Assure-toi d'importer le bon fichier CSS (TypewriterView.css ou équivalent)
-import "./TypewriterView.css"; // MODIFIÉ pour pointer vers le CSS correct supposé
+import "./TypewriterView.css"; // Assure-toi que c'est le bon fichier CSS
 
-// --- Constantes de base (peuvent être ajustées) ---
-const PAPER_INITIAL_PADDING_PX = 40; // Marge interne du papier
-const PAPER_CONTENT_CHARS_WIDE_DEFAULT = 70; // Nombre de caractères par défaut
-const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25; // Nombre de lignes par défaut
+const CHARACTER_WIDTH_ESTIMATE_PX = 10.5; // Sera mesuré
+const LINE_HEIGHT_PX = 28; // Sera mesuré
+const PAPER_INITIAL_PADDING_PX = 40;
+
+const PAPER_CONTENT_CHARS_WIDE = 70; // Largeur FIXE du contenu du papier en caractères
+const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25;
 
 const FIXED_CURSOR_VIEWPORT_X_PERCENT = 50;
 const FIXED_CURSOR_VIEWPORT_Y_PERCENT = 30;
@@ -24,20 +24,18 @@ interface CharObject {
 
 const FeuillePapier: React.FC = () => {
   const viewportRef = useRef<HTMLDivElement>(null);
-  const measureCharRef = useRef<HTMLSpanElement>(null); // Pour mesurer un caractère
-  const measureLineRef = useRef<HTMLDivElement>(null); // Pour mesurer la hauteur d'une ligne
+  const measureCharRef = useRef<HTMLSpanElement>(null);
+  const measureLineRef = useRef<HTMLDivElement>(null);
 
-  // --- États pour les dimensions calculées ---
-  const [charWidth, setCharWidth] = useState(10.5); // Valeur par défaut
-  const [lineHeight, setLineHeight] = useState(28); // Valeur par défaut
-  const [paperContentCharsWide, setPaperContentCharsWide] = useState(
-    PAPER_CONTENT_CHARS_WIDE_DEFAULT
-  );
+  const [charWidth, setCharWidth] = useState(CHARACTER_WIDTH_ESTIMATE_PX);
+  const [lineHeight, setLineHeight] = useState(LINE_HEIGHT_PX);
 
-  // Dimensions calculées du papier
-  const paperContentWidthPx = paperContentCharsWide * charWidth;
+  // paperContentCharsWide est maintenant une constante (ou pourrait être un état si on veut le changer via des options)
+  // Pour l'instant, c'est la constante PAPER_CONTENT_CHARS_WIDE définie ci-dessus.
+
+  const paperContentWidthPx = PAPER_CONTENT_CHARS_WIDE * charWidth;
   const paperSheetWidthPx = paperContentWidthPx + 2 * PAPER_INITIAL_PADDING_PX;
-  const paperContentHeightPx = PAPER_CONTENT_LINES_HIGH_DEFAULT * lineHeight; // Hauteur basée sur un nombre de lignes fixe pour l'instant
+  const paperContentHeightPx = PAPER_CONTENT_LINES_HIGH_DEFAULT * lineHeight;
   const paperSheetHeightPx =
     paperContentHeightPx + 2 * PAPER_INITIAL_PADDING_PX;
 
@@ -58,9 +56,8 @@ const FeuillePapier: React.FC = () => {
       return typingPointXInViewport - PAPER_INITIAL_PADDING_PX;
     }
     return 0;
-  }, [viewportRef]); // Ajout des dépendances manquantes
+  }, [viewportRef]);
 
-  // Mesurer les dimensions réelles et initialiser/ajuster la position du papier
   useEffect(() => {
     const calculateDimensionsAndPosition = () => {
       if (
@@ -68,24 +65,24 @@ const FeuillePapier: React.FC = () => {
         measureCharRef.current &&
         measureLineRef.current
       ) {
-        const measuredCharWidth =
-          measureCharRef.current.offsetWidth || charWidth;
-        const measuredLineHeight =
-          measureLineRef.current.offsetHeight || lineHeight;
-        setCharWidth(measuredCharWidth);
-        setLineHeight(measuredLineHeight);
+        const measuredCharWidth = measureCharRef.current.offsetWidth;
+        const measuredLineHeight = measureLineRef.current.offsetHeight;
 
-        // Optionnel: Rendre PAPER_CONTENT_CHARS_WIDE responsif (simplifié ici)
-        // const availableWidthForText = viewportRef.current.offsetWidth - (2 * PAPER_INITIAL_PADDING_PX) - (quelques marges de sécurité);
-        // const newPaperContentCharsWide = Math.max(10, Math.floor(availableWidthForText / measuredCharWidth));
-        // setPaperContentCharsWide(newPaperContentCharsWide);
-        // Pour l'instant, on garde PAPER_CONTENT_CHARS_WIDE_DEFAULT
+        let charW =
+          measuredCharWidth > 0
+            ? measuredCharWidth
+            : CHARACTER_WIDTH_ESTIMATE_PX;
+        let lineH =
+          measuredLineHeight > 0 ? measuredLineHeight : LINE_HEIGHT_PX;
+
+        setCharWidth(charW);
+        setLineHeight(lineH);
 
         const viewportHeight = viewportRef.current.offsetHeight;
         const typingPointYInViewport =
           (viewportHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
 
-        const initialX = getInitialPaperXForNewLine(); // Utilise la version mise à jour
+        const initialX = getInitialPaperXForNewLine();
         const initialY = typingPointYInViewport - PAPER_INITIAL_PADDING_PX;
 
         setPaperSheetX(initialX);
@@ -93,11 +90,16 @@ const FeuillePapier: React.FC = () => {
       }
     };
 
-    calculateDimensionsAndPosition(); // Calcul initial
-    window.addEventListener("resize", calculateDimensionsAndPosition); // Recalculer au redimensionnement
+    calculateDimensionsAndPosition(); // Appel initial
+    // Une seule fois suffit si la taille de la police de base ne change pas,
+    // ou si le recalcul de charW/lineH suffit.
+    // Si PAPER_CONTENT_CHARS_WIDE devait changer avec la taille du viewport, alors l'écouteur resize serait plus critique ici.
+    // Pour une largeur de papier fixe, on peut même enlever l'écouteur resize si le point de frappe % est stable.
+    // Gardons-le pour l'instant au cas où la taille de police de base changerait dynamiquement (zoom navigateur).
+    window.addEventListener("resize", calculateDimensionsAndPosition);
     return () =>
       window.removeEventListener("resize", calculateDimensionsAndPosition);
-  }, [getInitialPaperXForNewLine, charWidth, lineHeight]); // Dépendances pour le recalcul
+  }, [getInitialPaperXForNewLine]); // Retiré charWidth et lineHeight pour éviter boucle si valeurs par défaut utilisées
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -105,8 +107,8 @@ const FeuillePapier: React.FC = () => {
       const currentLineChars = allLines[currentLineIndex] || [];
 
       if (event.key.length === 1) {
-        if (currentLineChars.length >= paperContentCharsWide) {
-          // Utilise l'état dynamique
+        if (currentLineChars.length >= PAPER_CONTENT_CHARS_WIDE) {
+          // Utilise la constante
           console.log("Fin de ligne atteinte (max chars), input bloqué.");
           return;
         }
@@ -120,13 +122,13 @@ const FeuillePapier: React.FC = () => {
         newAllLines[currentLineIndex] = newLineContent;
         setAllLines(newAllLines);
 
-        setPaperSheetX((prevX) => prevX - charWidth); // Utilise charWidth mesuré
+        setPaperSheetX((prevX) => prevX - charWidth);
 
         const charsOnCurrentLine = newLineContent.length;
         if (
           !bellRungForThisLine &&
-          charsOnCurrentLine >= paperContentCharsWide - CHARS_IN_BELL_ZONE &&
-          charsOnCurrentLine < paperContentCharsWide
+          charsOnCurrentLine >= PAPER_CONTENT_CHARS_WIDE - CHARS_IN_BELL_ZONE &&
+          charsOnCurrentLine < PAPER_CONTENT_CHARS_WIDE
         ) {
           if (bellSound) {
             bellSound.currentTime = 0;
@@ -145,22 +147,21 @@ const FeuillePapier: React.FC = () => {
           newAllLines[currentLineIndex] = newLineContent;
           setAllLines(newAllLines);
 
-          setPaperSheetX((prevX) => prevX + charWidth); // Utilise charWidth mesuré
+          setPaperSheetX((prevX) => prevX + charWidth);
 
           const charsOnCurrentLine = newLineContent.length;
           if (
             bellRungForThisLine &&
-            charsOnCurrentLine < paperContentCharsWide - CHARS_IN_BELL_ZONE
+            charsOnCurrentLine < PAPER_CONTENT_CHARS_WIDE - CHARS_IN_BELL_ZONE
           ) {
             setBellRungForThisLine(false);
           }
         }
-        // TODO: Gérer backspace en début de ligne
       } else if (event.key === "Enter") {
         setCurrentLineIndex((prevIndex) => prevIndex + 1);
         setAllLines((prevLines) => [...prevLines, []]);
         setPaperSheetX(getInitialPaperXForNewLine());
-        setPaperSheetY((prevY) => prevY - lineHeight); // Utilise lineHeight mesuré
+        setPaperSheetY((prevY) => prevY - lineHeight);
         setBellRungForThisLine(false);
       }
     },
@@ -169,9 +170,9 @@ const FeuillePapier: React.FC = () => {
       currentLineIndex,
       bellRungForThisLine,
       getInitialPaperXForNewLine,
-      charWidth, // Ajouté comme dépendance
-      lineHeight, // Ajouté comme dépendance
-      paperContentCharsWide, // Ajouté comme dépendance
+      charWidth,
+      lineHeight,
+      // paperContentCharsWide n'est plus un état, donc plus une dépendance ici
     ]
   );
 
@@ -189,7 +190,7 @@ const FeuillePapier: React.FC = () => {
     <div
       key={`line-${lineIdx}`}
       className="paper-line"
-      style={{ minHeight: `${lineHeight}px` }} // Utilise lineHeight mesuré
+      style={{ minHeight: `${lineHeight}px` }}
     >
       {lineChars.map((charObj) => (
         <CaractereFrappe key={charObj.id} char={charObj.char} />
@@ -199,7 +200,6 @@ const FeuillePapier: React.FC = () => {
 
   return (
     <>
-      {/* Éléments de mesure cachés */}
       <div
         style={{
           position: "absolute",
@@ -209,8 +209,7 @@ const FeuillePapier: React.FC = () => {
           fontSize: "1.1rem",
         }}
       >
-        <span ref={measureCharRef}>M</span>{" "}
-        {/* Caractère typique pour la largeur */}
+        <span ref={measureCharRef}>M</span>
         <div
           ref={measureLineRef}
           style={{ lineHeight: "1.8", minHeight: "1.8rem" }}
@@ -220,20 +219,15 @@ const FeuillePapier: React.FC = () => {
       </div>
 
       <div className="typewriter-viewport" ref={viewportRef}>
-        {cursorBlinkVisible && (
-          <div
-            className="fixed-cursor-overlay"
-            style={{
-              left: `${FIXED_CURSOR_VIEWPORT_X_PERCENT}%`,
-              top: `${FIXED_CURSOR_VIEWPORT_Y_PERCENT}%`,
-              width: `${charWidth}px`, // Largeur d'un caractère
-              height: `${lineHeight * 0.85}px`, // Hauteur un peu moins que la ligne
-              backgroundColor: "#1A1A1A", // Couleur encre
-              transform: "translateX(-50%) translateY(-2px)", // Ajuste pour un meilleur centrage visuel
-              // Ajoute une opacité pour le clignotement si géré par JS, sinon gère avec la classe CSS
-            }}
-          />
-        )}
+        <div
+          className="fixed-cursor-overlay"
+          style={{
+            left: `${FIXED_CURSOR_VIEWPORT_X_PERCENT}%`,
+            top: `${FIXED_CURSOR_VIEWPORT_Y_PERCENT}%`,
+            transform: `translateX(-50%) translateY(-${lineHeight * 0.65}px)`,
+            opacity: cursorBlinkVisible ? 1 : 0,
+          }}
+        />
 
         <div
           className="paper-sheet"
@@ -242,9 +236,11 @@ const FeuillePapier: React.FC = () => {
             height: `${paperSheetHeightPx}px`,
             transform: `translate(${paperSheetX}px, ${paperSheetY}px)`,
             padding: `${PAPER_INITIAL_PADDING_PX}px`,
-            fontFamily: '"Courier Prime", "Courier New", Courier, monospace', // Assurer la cohérence
+            fontFamily: '"Courier Prime", "Courier New", Courier, monospace',
             fontSize: "1.1rem",
             lineHeight: "1.8",
+            "--paper-initial-padding-px": `${PAPER_INITIAL_PADDING_PX}px`,
+            "--paper-margin-line-right-offset-px": "60px",
           }}
         >
           {paperContent}

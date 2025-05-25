@@ -1,4 +1,3 @@
-// Dans src/components/CaractereFrappe.tsx
 import React, { useRef, useLayoutEffect } from "react";
 import gsap from "gsap";
 import "./CaractereFrappe.css";
@@ -8,9 +7,7 @@ interface CaractereFrappeProps {
 }
 
 const keyPressSound =
-  typeof Audio !== "undefined"
-    ? new Audio("/sounds/typewriter.mp3") // Assure-toi que c'est le bon son
-    : null;
+  typeof Audio !== "undefined" ? new Audio("/sounds/typewriter.mp3") : null;
 
 const CaractereFrappe: React.FC<CaractereFrappeProps> = ({ char }) => {
   const charRef = useRef<HTMLSpanElement>(null);
@@ -30,38 +27,45 @@ const CaractereFrappe: React.FC<CaractereFrappeProps> = ({ char }) => {
         },
       });
 
+      const randomYStart = gsap.utils.random(-1, 1);
+      const randomRotStart = gsap.utils.random(-3, 3);
+
       tl.set(charRef.current, {
-        // État initial avant toute animation (invisible)
         opacity: 0,
-        scale: 1, // Commence à taille normale mais invisible
-        y: 0,
-        color: "#000", // Couleur d'encre finale
+        scale: 0.8,
+        y: randomYStart,
+        color: "#000",
         fontWeight: "normal",
+        rotation: randomRotStart,
       })
         .to(charRef.current, {
-          // Apparition très rapide et "impact"
           opacity: 1,
-          scale: 1.25, // Surdimensionnement pour le "coup"
-          y: -3, // Léger soulèvement/enfoncement
-          fontWeight: "bold",
-          color: "#101010", // Encre très fraîche/foncée
-          duration: 0.06, // Impact très bref
-          ease: "power2.inOut", // Rapide et direct
-          // Optionnel : une rotation infime pour l'impact
-          // rotation: gsap.utils.random(-1.5, 1.5),
+          scale: 1.2,
+          y: -2 + randomYStart,
+          fontWeight: "700",
+          color: "#000000",
+          rotation: randomRotStart / 2,
+          duration: 0.04,
+          ease: "sine.inOut",
         })
         .to(charRef.current, {
-          // Stabilisation / "rebond" après l'impact
+          y: `+=${gsap.utils.random(0.5, 1.5)}`,
+          scale: `-=0.05`,
+          rotation: `-=${gsap.utils.random(1, 2)}`,
+          duration: 0.04,
+          ease: "power1.inOut",
+          yoyo: true,
+          repeat: 1,
+        })
+        .to(charRef.current, {
           scale: 1,
           y: 0,
           fontWeight: "normal",
-          color: "#000000", // Couleur d'encre finale
-          // rotation: 0, // Remettre la rotation à 0 si utilisée
-          duration: 0.3, // Laisser un peu de temps pour se stabiliser
-          ease: "elastic.out(1, 0.6)", // Effet élastique pour la stabilisation
+          color: "#000000",
+          rotation: 0,
+          duration: 0.3,
+          ease: "expo.out",
         });
-
-    
     }
   }, []);
 
