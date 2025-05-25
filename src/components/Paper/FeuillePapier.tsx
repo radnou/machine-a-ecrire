@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import CaractereFrappe from "./CaractereFrappe";
-import "./TypewriterView.css";
+import CaractereFrappe from "../CaractereFrappe";
+// Change cet import pour pointer vers les styles spécifiques au papier/contenu,
+// les styles du viewport sont maintenant dans MainLayout.css
+import "./PaperStyles.css"; // Nouveau fichier CSS suggéré pour les styles UNIQUEMENT du papier et du texte
 
+// --- Constantes (ajuste-les précisément !) ---
 const CHARACTER_WIDTH_ESTIMATE_PX = 10.5;
 const LINE_HEIGHT_PX = 28;
 const PAPER_INITIAL_PADDING_PX = 40;
 
-const PAPER_CONTENT_CHARS_WIDE = 70;
-const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25;
+const PAPER_CONTENT_CHARS_WIDE = 90;
+const PAPER_CONTENT_LINES_HIGH_DEFAULT = 25; // Pour la hauteur initiale du papier
 
-const FIXED_CURSOR_VIEWPORT_X_PERCENT = 50;
-const FIXED_CURSOR_VIEWPORT_Y_PERCENT = 30;
+// Ces pourcentages sont maintenant par rapport au layout-main-content
+const FIXED_CURSOR_AREA_X_PERCENT = 50;
+const FIXED_CURSOR_AREA_Y_PERCENT = 20; // Plus haut dans la zone de contenu
 
 const CHARS_IN_BELL_ZONE = 7;
 const BELL_SOUND_SRC = "/sounds/typewriter-bell.mp3";
@@ -23,7 +27,8 @@ interface CharObject {
 }
 
 const FeuillePapier: React.FC = () => {
-  const viewportRef = useRef<HTMLDivElement>(null);
+  // Ce ref pointera maintenant vers le conteneur de .paper-sheet DANS layout-main-content
+  const mainContentRef = useRef<HTMLDivElement>(null);
   const measureCharRef = useRef<HTMLSpanElement>(null);
   const measureLineRef = useRef<HTMLDivElement>(null);
 
@@ -55,7 +60,7 @@ const FeuillePapier: React.FC = () => {
     const calculateDimensionsAndPosition = () => {
       if (
         !didCancel &&
-        viewportRef.current &&
+        mainContentRef.current &&
         measureCharRef.current &&
         measureLineRef.current
       ) {
@@ -66,27 +71,29 @@ const FeuillePapier: React.FC = () => {
         const newLineH =
           measuredLineHeight > 0 ? measuredLineHeight : lineHeight;
 
-        if (newCharW !== charWidth) setCharWidth(newCharW);
-        if (newLineH !== lineHeight) setLineHeight(newLineH);
+        if (newCharW !== charWidth && !didCancel) setCharWidth(newCharW);
+        if (newLineH !== lineHeight && !didCancel) setLineHeight(newLineH);
 
-        const viewportWidth = viewportRef.current.offsetWidth;
-        const viewportHeight = viewportRef.current.offsetHeight;
-        const typingPointXInViewport =
-          (viewportWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
-        const typingPointYInViewport =
-          (viewportHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
+        const mainContentWidth = mainContentRef.current.clientWidth; // Utilise la largeur de la zone de contenu
+        const mainContentHeight = mainContentRef.current.clientHeight;
+        const typingPointXInMainContent =
+          (mainContentWidth * FIXED_CURSOR_AREA_X_PERCENT) / 100;
+        const typingPointYInMainContent =
+          (mainContentHeight * FIXED_CURSOR_AREA_Y_PERCENT) / 100;
 
         const newPaperX =
-          typingPointXInViewport -
+          typingPointXInMainContent -
           PAPER_INITIAL_PADDING_PX -
           currentTextInsertionPoint.x;
         const newPaperY =
-          typingPointYInViewport -
+          typingPointYInMainContent -
           PAPER_INITIAL_PADDING_PX -
           currentTextInsertionPoint.y;
 
-        setPaperSheetX(newPaperX);
-        setPaperSheetY(newPaperY);
+        if (!didCancel) {
+          setPaperSheetX(newPaperX);
+          setPaperSheetY(newPaperY);
+        }
       }
     };
 
@@ -109,7 +116,6 @@ const FeuillePapier: React.FC = () => {
           setLineHeight(measuredLineHeight);
         }
       }
-      // Calculate position after a tick to ensure charWidth/lineHeight might have updated
       setTimeout(() => {
         if (!didCancel) calculateDimensionsAndPosition();
       }, 0);
@@ -122,7 +128,7 @@ const FeuillePapier: React.FC = () => {
       didCancel = true;
       window.removeEventListener("resize", calculateDimensionsAndPosition);
     };
-  }, [charWidth, lineHeight, currentTextInsertionPoint, viewportRef]);
+  }, [charWidth, lineHeight, currentTextInsertionPoint, mainContentRef]); // mainContentRef au lieu de viewportRef
 
   const handleKeyPress = useCallback(
     (event: KeyboardEvent) => {
@@ -189,19 +195,22 @@ const FeuillePapier: React.FC = () => {
         newInsertionX = 0;
         newInsertionY += lineHeight;
 
-        if (viewportRef.current) {
-          const viewportWidth = viewportRef.current.offsetWidth;
-          const typingPointXInViewport =
-            (viewportWidth * FIXED_CURSOR_VIEWPORT_X_PERCENT) / 100;
+        if (mainContentRef.current) {
+          // Utilise mainContentRef
+          const mainContentWidth = mainContentRef.current.clientWidth;
+          const typingPointXInMainContent =
+            (mainContentWidth * FIXED_CURSOR_AREA_X_PERCENT) / 100;
           const targetPaperX =
-            typingPointXInViewport - PAPER_INITIAL_PADDING_PX;
+            typingPointXInMainContent - PAPER_INITIAL_PADDING_PX;
           setPaperSheetX(targetPaperX);
 
-          const viewportHeight = viewportRef.current.offsetHeight;
-          const typingPointYInViewport =
-            (viewportHeight * FIXED_CURSOR_VIEWPORT_Y_PERCENT) / 100;
+          const mainContentHeight = mainContentRef.current.clientHeight;
+          const typingPointYInMainContent =
+            (mainContentHeight * FIXED_CURSOR_AREA_Y_PERCENT) / 100;
           const targetPaperY =
-            typingPointYInViewport - PAPER_INITIAL_PADDING_PX - newInsertionY;
+            typingPointYInMainContent -
+            PAPER_INITIAL_PADDING_PX -
+            newInsertionY;
           setPaperSheetY(targetPaperY);
         }
         setBellRungForThisLine(false);
@@ -215,11 +224,13 @@ const FeuillePapier: React.FC = () => {
       charWidth,
       lineHeight,
       currentTextInsertionPoint,
-      viewportRef,
+      mainContentRef, // mainContentRef au lieu de viewportRef
     ]
   );
 
   useEffect(() => {
+    // L'écouteur d'événements doit être sur un élément qui a le focus,
+    // ou globalement puis filtré. Pour l'instant, global reste.
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
   }, [handleKeyPress]);
@@ -242,7 +253,18 @@ const FeuillePapier: React.FC = () => {
   ));
 
   return (
-    <>
+    // Ce div est le conteneur DANS la zone layout-main-content
+    // Il doit avoir position relative pour son propre fixed-cursor-overlay
+    <div
+      className="feuille-papier-active-area"
+      ref={mainContentRef}
+      style={{
+        width: "100%",
+        height: "100%",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
       <div
         style={{
           position: "absolute",
@@ -261,35 +283,35 @@ const FeuillePapier: React.FC = () => {
         </div>
       </div>
 
-      <div className="typewriter-viewport" ref={viewportRef}>
+      {cursorBlinkVisible && (
         <div
           className="fixed-cursor-overlay"
           style={{
-            left: `${FIXED_CURSOR_VIEWPORT_X_PERCENT}%`,
-            top: `${FIXED_CURSOR_VIEWPORT_Y_PERCENT}%`,
+            // Ces % sont maintenant par rapport à feuille-papier-active-area
+            left: `${FIXED_CURSOR_AREA_X_PERCENT}%`,
+            top: `${FIXED_CURSOR_AREA_Y_PERCENT}%`,
             transform: `translateX(-50%) translateY(-${lineHeight * 0.65}px)`,
-            opacity: cursorBlinkVisible ? 1 : 0,
+            opacity: 1, // Toujours visible, le clignotement géré par cursorBlinkVisible plus haut si besoin
+            // Styles pour le curseur "guide métallique" (width, height, bg) sont dans le CSS
           }}
         />
+      )}
 
-        <div
-          className="paper-sheet"
-          style={{
-            width: `${paperSheetWidthPx}px`,
-            height: `${paperSheetHeightPx}px`,
-            transform: `translate(${paperSheetX}px, ${paperSheetY}px)`,
-            padding: `${PAPER_INITIAL_PADDING_PX}px`,
-            fontFamily: '"Courier Prime", "Courier New", Courier, monospace',
-            fontSize: "1.1rem",
-            lineHeight: "1.8",
-            "--paper-initial-padding-px": `${PAPER_INITIAL_PADDING_PX}px`,
-            "--paper-margin-line-right-offset-px": "60px",
-          }}
-        >
-          {paperContent}
-        </div>
+      <div
+        className="paper-sheet"
+        style={{
+          width: `${paperSheetWidthPx}px`,
+          height: `${paperSheetHeightPx}px`,
+          transform: `translate(${paperSheetX}px, ${paperSheetY}px)`,
+          // Le padding est maintenant dans le CSS de .paper-sheet
+          // fontFamily, fontSize, lineHeight sont aussi dans le CSS de .paper-sheet
+          "--paper-initial-padding-px": `${PAPER_INITIAL_PADDING_PX}px`,
+          "--paper-margin-line-right-offset-px": "60px",
+        }}
+      >
+        {paperContent}
       </div>
-    </>
+    </div>
   );
 };
 

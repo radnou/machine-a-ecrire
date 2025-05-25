@@ -1,0 +1,61 @@
+/* src/components/PaperStyles.css */
+
+.feuille-papier-active-area {
+  /* Ce conteneur prendra la taille de .layout-main-content */
+  /* Il est important qu'il ait position: relative pour son .fixed-cursor-overlay */
+}
+
+.fixed-cursor-overlay {
+  /* Styles pour le curseur "guide métallique" comme défini dans ma réponse précédente */
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  width: 3px;
+  height: 25px;
+  background-color: #777;
+  border-radius: 1px;
+  box-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.fixed-cursor-overlay::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px;
+  height: 8px;
+  background-color: #777;
+}
+
+.paper-sheet {
+  background-color: #f4f2ed;
+  /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E"); */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1) inset, 0 5px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #e0e0d8;
+  position: relative; /* Important pour la ligne de marge ::after */
+  box-sizing: border-box;
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  white-space: pre;
+  transition: transform 0.08s linear;
+  padding: var(--paper-initial-padding-px, 40px); /* Utilise la variable CSS */
+}
+
+.paper-sheet::after {
+  content: "";
+  position: absolute;
+  top: var(--paper-initial-padding-px, 40px);
+  bottom: var(--paper-initial-padding-px, 40px);
+  right: var(--paper-margin-line-right-offset-px, 60px);
+  width: 1px;
+  background-color: rgba(200, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.paper-line {
+  display: flex;
+  align-items: baseline;
+  /* min-height est appliqué en JS */
+}
