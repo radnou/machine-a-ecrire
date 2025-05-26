@@ -7,8 +7,10 @@
     overflow-x: hidden;
     width: 240px;
     transition: width 0.3s ease-in-out, 
-                padding 0.3s ease-in-out, 
-                opacity 0.2s ease-in-out 0.1s; /* Délai pour l'opacité */
+                padding-left 0.3s ease-in-out, 
+                padding-right 0.3s ease-in-out, 
+                opacity 0.2s ease-in-out 0.05s,
+                border-width 0.3s ease-in-out;
     opacity: 1;
     box-sizing: border-box;
   }
@@ -18,7 +20,7 @@
     padding-left: 0;
     padding-right: 0;
     opacity: 0;
-    border-right: none;
+    border-right-width: 0;
   }
   
   .sidebar-section h4 {
@@ -37,5 +39,5 @@
   
   .sidebar-section li {
     padding: 4px 0;
-    cursor: default; /* deviendra pointer pour les actions */
+    cursor: default;
   }

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import CaractereFrappe from "../CaractereFrappe";
-import "./FeuillePapier.css";
+import "./PaperStyles.css";
 
 const CHARACTER_WIDTH_ESTIMATE_PX = 10.5;
 const LINE_HEIGHT_PX = 28;

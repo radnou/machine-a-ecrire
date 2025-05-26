@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./MainLayout.css";
 import TopMenu from "../TopBar/TopMenu";
 import LeftSidebar from "../Sidebars/LeftSidebar";
 import RightSidebar from "../Sidebars/RightSidebar";
 import BottomBar from "../StatusBar/BottomBar";
-import FeuillePapier, {
-  CharObject as FeuilleCharObject,
-} from "../Paper/FeuillePapier"; // Importer CharObject
+import FeuillePapier, { type CharObject as FeuilleCharObject } from "../Paper/FeuillePapier";
 
 const MainLayout: React.FC = () => {
   const [isLeftSidebarVisible, setIsLeftSidebarVisible] = useState(true);

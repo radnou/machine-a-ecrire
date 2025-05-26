@@ -59,3 +59,53 @@
   align-items: baseline;
   /* min-height est appliqué en JS */
 }
+.feuille-papier-container {
+  position: relative; /* Nécessaire pour positionner la ligne de marge en absolu */
+  width: 100%;
+  overflow: hidden;
+  padding: 40px; /* Marges du papier : 40px en haut, à droite, en bas, à gauche */
+  background-color: #fdfdf8;
+  min-height: 100vh;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+/* Ligne de marge rouge sur le côté droit */
+.feuille-papier-container::after {
+  content: "";
+  position: absolute;
+  /* La ligne commence après le padding du haut et s'arrête avant le padding du bas */
+  top: 40px;
+  bottom: 40px;
+  /* Position de la ligne de marge :
+     Si le padding-right est de 40px, et qu'on veut la ligne à 20px de la fin de la zone de texte,
+     alors right = 40px (padding) + 20px (marge visuelle interne) = 60px
+     Ajuste cette valeur de 'right' selon la largeur de marge souhaitée.
+     Une marge typique pourrait être autour de 5-10 caractères.
+     Si un caractère fait ~10.5px, 10 caractères = 105px.
+     Donc right = 40px (padding) + 105px (marge de fin de ligne) = ~145px.
+     Testons avec une valeur indicative, tu l'ajusteras.
+  */
+  right: 80px; /* Exemple : Ligne de marge à 80px du bord droit du conteneur */
+  width: 1px;
+  background-color: rgba(200, 0, 0, 0.4); /* Rouge translucide */
+}
+
+.zone-texte {
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  line-height: 1.8;
+  font-size: 1.1rem;
+  display: inline-block;
+  min-width: 100%;
+  transition: transform 0.08s linear;
+}
+
+.cursor {
+  background-color: #333;
+  display: inline-block;
+  width: 8px; /* Ajuste si besoin avec ta police */
+  margin-left: 1px;
+  vertical-align: bottom;
+  position: relative;
+  top: -2px; /* Ajuste pour un alignement parfait avec le texte */
+}

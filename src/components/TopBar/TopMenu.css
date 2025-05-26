@@ -7,6 +7,7 @@
   padding: 0 10px;
   justify-content: space-between;
   height: 50px;
+  box-sizing: border-box;
 }
 
 .top-menu-bar button {
@@ -17,10 +18,11 @@
   padding: 5px 8px;
   margin: 0 2px;
   border-radius: 4px;
+  line-height: 1; 
 }
 
 .top-menu-bar button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0,0,0,0.1);
 }
 
 .file-actions {

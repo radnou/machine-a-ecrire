@@ -1,50 +1,62 @@
-.feuille-papier-container {
-  position: relative; /* Nécessaire pour positionner la ligne de marge en absolu */
+/* src/components/FeuillePapier.css */
+
+.feuille-papier-active-area {
   width: 100%;
+  height: 100%;
+  position: relative;
   overflow: hidden;
-  padding: 40px; /* Marges du papier : 40px en haut, à droite, en bas, à gauche */
-  background-color: #fdfdf8;
-  min-height: 100vh;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  box-sizing: border-box;
 }
 
-/* Ligne de marge rouge sur le côté droit */
-.feuille-papier-container::after {
+.fixed-cursor-overlay {
+  position: absolute;
+  z-index: 10;
+  pointer-events: none;
+  width: 3px; 
+  height: 25px; 
+  background-color: #777; 
+  border-radius: 1px;
+  box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+.fixed-cursor-overlay::after {
   content: '';
   position: absolute;
-  /* La ligne commence après le padding du haut et s'arrête avant le padding du bas */
-  top: 40px;
-  bottom: 40px;
-  /* Position de la ligne de marge :
-     Si le padding-right est de 40px, et qu'on veut la ligne à 20px de la fin de la zone de texte,
-     alors right = 40px (padding) + 20px (marge visuelle interne) = 60px
-     Ajuste cette valeur de 'right' selon la largeur de marge souhaitée.
-     Une marge typique pourrait être autour de 5-10 caractères.
-     Si un caractère fait ~10.5px, 10 caractères = 105px.
-     Donc right = 40px (padding) + 105px (marge de fin de ligne) = ~145px.
-     Testons avec une valeur indicative, tu l'ajusteras.
-  */
-  right: 80px; /* Exemple : Ligne de marge à 80px du bord droit du conteneur */
-  width: 1px;
-  background-color: rgba(200, 0, 0, 0.4); /* Rouge translucide */
+  bottom: -4px; 
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 8px; 
+  height: 8px;
+  background-color: #777; 
 }
 
-.zone-texte {
-  font-family: 'Courier Prime', 'Courier New', Courier, monospace;
-  line-height: 1.8;
-  font-size: 1.1rem;
-  display: inline-block;
-  min-width: 100%;
-  transition: transform 0.08s linear;
-}
-
-.cursor {
-  background-color: #333;
-  display: inline-block;
-  width: 8px; /* Ajuste si besoin avec ta police */
-  margin-left: 1px;
-  vertical-align: bottom;
+.paper-sheet {
+  background-color: #f4f2ed;
+  /* background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E"); */
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.1) inset,
+              0 5px 12px rgba(0,0,0,0.2);
+  border: 1px solid #e0e0d8;
   position: relative;
-  top: -2px; /* Ajuste pour un alignement parfait avec le texte */
+  box-sizing: border-box;
+  font-family: "Courier Prime", "Courier New", Courier, monospace;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  white-space: pre;
+  transition: transform 0.08s linear;
+  padding: var(--paper-initial-padding-px, 40px);
+}
+
+.paper-sheet::after {
+  content: '';
+  position: absolute;
+  top: var(--paper-initial-padding-px, 40px);
+  bottom: var(--paper-initial-padding-px, 40px);
+  right: var(--paper-margin-line-right-offset-px, 60px);
+  width: 1px;
+  background-color: rgba(200, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.paper-line {
+  display: flex;
+  align-items: baseline;
 }

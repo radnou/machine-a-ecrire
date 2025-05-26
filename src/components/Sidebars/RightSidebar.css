@@ -8,7 +8,8 @@
     width: 200px;
     transition: width 0.3s ease-in-out, 
                 padding 0.3s ease-in-out, 
-                opacity 0.2s ease-in-out 0.1s;
+                opacity 0.2s ease-in-out 0.05s,
+                border-width 0.3s ease-in-out;
     opacity: 1;
     box-sizing: border-box;
   }
@@ -18,10 +19,11 @@
     padding-left: 0;
     padding-right: 0;
     opacity: 0;
-    border-left: none;
+    border-left-width: 0;
   }
   
   /* Styles partagés avec LeftSidebar.css, pourraient être dans un fichier commun */
+  /* Pour l'instant, je les répète pour la clarté. */
   .sidebar-section h4 {
     margin-top: 0;
     margin-bottom: 8px;

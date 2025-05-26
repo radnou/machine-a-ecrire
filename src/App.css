@@ -1,0 +1,11 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    font-family: "Courier Prime", "Courier New", Courier, monospace;
+    background-color: #2c2a29;
+    font-size: 16px;
+    overflow: hidden;
+  }
