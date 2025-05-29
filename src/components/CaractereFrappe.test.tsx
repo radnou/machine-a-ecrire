@@ -47,12 +47,15 @@ vi.stubGlobal('Audio', MockAudioConstructor); // Stub global Audio constructor
 
 describe('CaractereFrappe Component', () => {
   // Dynamically import CaractereFrappe
-  let CaractereFrappe: React.FC<{ char: string }>;
+  let CaractereFrappe: React.FC<{ char: string; state: 'fresh' | 'dried' }>;
 
   beforeAll(async () => {
-    const module = await import('./CaractereFrappe');
+    // Make sure the dynamic import points to the actual component, not a mock
+    const module = await import('./CaractereFrappe'); // Assuming this is the actual component path
     CaractereFrappe = module.default;
   });
+
+  // beforeEach and afterEach will remain the same or be slightly adjusted if needed
 
   beforeEach(() => {
     vi.clearAllMocks(); 
@@ -75,25 +78,27 @@ describe('CaractereFrappe Component', () => {
     // MockAudioConstructor.mockClear(); 
   });
 
+  // afterEach remains the same
+
   afterEach(() => {
     cleanup();
   });
 
   it('renders the passed character correctly', () => {
-    render(<CaractereFrappe char="A" />);
+    // Provide a default state for existing tests if not specified
+    render(<CaractereFrappe char="A" state="dried" />);
     expect(screen.getByText('A')).toBeInTheDocument();
   });
 
   it('renders a space character as &nbsp;', () => {
-    const { container } = render(<CaractereFrappe char=" " />);
+    const { container } = render(<CaractereFrappe char=" " state="dried" />);
     const spanElement = container.querySelector('span.caractere-frappe');
     expect(spanElement).not.toBeNull();
     expect(spanElement?.innerHTML).toBe('&nbsp;');
   });
 
   it('initializes GSAP timeline on mount and calls set and to', () => {
-    render(<CaractereFrappe char="B" />);
-    // Access the mocks via the gsap object itself
+    render(<CaractereFrappe char="B" state="fresh" />);
     expect(gsap.timeline).toHaveBeenCalledTimes(1);
     expect(mockTimelineInstance.set).toHaveBeenCalled();
     expect(mockTimelineInstance.to).toHaveBeenCalled();
@@ -101,20 +106,34 @@ describe('CaractereFrappe Component', () => {
   });
   
   it('attempts to play sound via GSAP timeline onComplete hook', () => {
-    render(<CaractereFrappe char="C" />);
+    render(<CaractereFrappe char="C" state="fresh" />);
     
     expect(gsap.timeline).toHaveBeenCalledTimes(1);
-    
-    // Get the options passed to gsap.timeline (which is now the mock function)
     const timelineOptions = (gsap.timeline as vi.Mock).mock.calls[0][0];
     expect(timelineOptions).toBeDefined();
     expect(timelineOptions.onComplete).toBeInstanceOf(Function);
     
-    // Execute the onComplete callback
     if (timelineOptions.onComplete) {
       timelineOptions.onComplete();
     }
-    
-    expect(mockAudioInstancePlay).toHaveBeenCalled(); // Check the specific mock function for play
+    expect(mockAudioInstancePlay).toHaveBeenCalled();
+  });
+
+  describe('Ink Drying State and Styling', () => {
+    it('applies .inkFresh class when state is "fresh"', () => {
+      const { container } = render(<CaractereFrappe char="F" state="fresh" />);
+      const spanElement = container.querySelector('span.caractere-frappe');
+      expect(spanElement).not.toBeNull();
+      expect(spanElement?.classList.contains('inkFresh')).toBe(true);
+      expect(spanElement?.classList.contains('inkDried')).toBe(false);
+    });
+
+    it('applies .inkDried class when state is "dried"', () => {
+      const { container } = render(<CaractereFrappe char="D" state="dried" />);
+      const spanElement = container.querySelector('span.caractere-frappe');
+      expect(spanElement).not.toBeNull();
+      expect(spanElement?.classList.contains('inkDried')).toBe(true);
+      expect(spanElement?.classList.contains('inkFresh')).toBe(false);
+    });
   });
 });
