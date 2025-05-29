@@ -20,6 +20,7 @@ const bellSound =
 export interface CharObject {
   id: string;
   char: string;
+  state: 'fresh' | 'dried'; // New property
 }
 
 export interface FeuillePapierProps {
@@ -27,11 +28,14 @@ export interface FeuillePapierProps {
   onTextChange?: (allLines: CharObject[][]) => void;
 }
 
+const INK_DRYING_TIME_MS = 2000; // 2 seconds
+
 const FeuillePapier: React.FC<FeuillePapierProps> = ({
   initialContent,
   onTextChange,
 }) => {
   const mainContentRef = useRef<HTMLDivElement>(null);
+  const dryingTimeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
   const measureCharRef = useRef<HTMLSpanElement>(null);
   const measureLineRef = useRef<HTMLDivElement>(null);
 
@@ -49,6 +53,29 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
 
   const [allLines, setAllLines] = useState<CharObject[][]>([[]]);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
+
+  // Function to update a character's state to 'dried'
+  const dryCharacter = useCallback((charId: string) => {
+    setAllLines((prevAllLines) => {
+      let charFoundAndUpdated = false;
+      const newAllLines = prevAllLines.map(line =>
+        line.map(charObj => {
+          if (charObj.id === charId && charObj.state === 'fresh') {
+            charFoundAndUpdated = true;
+            return { ...charObj, state: 'dried' as 'dried' };
+          }
+          return charObj;
+        })
+      );
+      if (charFoundAndUpdated && onTextChange) {
+        // Optional: notify parent about this specific type of change if needed
+        // For now, onTextChange is primarily for text content, not just state updates
+        // Consider if a separate callback for state changes is ever needed
+      }
+      return charFoundAndUpdated ? newAllLines : prevAllLines;
+    });
+    dryingTimeoutsRef.current.delete(charId);
+  }, [onTextChange]); // Added onTextChange to dependencies, though not strictly used in current logic for state update
 
   const [cursorBlinkVisible, setCursorBlinkVisible] = useState(true);
   const [bellRungForThisLine, setBellRungForThisLine] = useState(false);
@@ -143,12 +170,24 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
           console.log("Fin de ligne atteinte, input bloqué.");
           return;
         }
+        const charId = `char-${Date.now()}-${Math.random()}`;
         const newChar: CharObject = {
-          id: `char-${Date.now()}-${Math.random()}`,
+          id: charId,
           char: event.key,
+          state: 'fresh', // Initialize as fresh
         };
         currentLineChars.push(newChar);
         newAllLinesState[currentLineIndex] = currentLineChars;
+
+        // Clear previous timeout for this charId if any (should not happen for new chars)
+        if (dryingTimeoutsRef.current.has(charId)) {
+          clearTimeout(dryingTimeoutsRef.current.get(charId)!);
+        }
+        // Set timeout to dry the character
+        const timeoutId = setTimeout(() => {
+          dryCharacter(charId);
+        }, INK_DRYING_TIME_MS);
+        dryingTimeoutsRef.current.set(charId, timeoutId);
 
         newInsertionX += charWidth;
         setPaperSheetX((prevX) => prevX - charWidth);
@@ -171,7 +210,11 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
         }
       } else if (event.key === "Backspace") {
         if (currentLineChars.length > 0) {
-          currentLineChars.pop();
+          const removedChar = currentLineChars.pop();
+          if (removedChar && dryingTimeoutsRef.current.has(removedChar.id)) {
+            clearTimeout(dryingTimeoutsRef.current.get(removedChar.id)!);
+            dryingTimeoutsRef.current.delete(removedChar.id);
+          }
           newAllLinesState[currentLineIndex] = currentLineChars;
 
           newInsertionX -= charWidth;
@@ -235,6 +278,7 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
         line.split("").map((char) => ({
           id: `loaded-${Date.now()}-${Math.random()}`,
           char,
+          state: 'dried' as 'dried', // Initial content is considered dried
         }))
       );
       setAllLines(newAllLinesData);
@@ -289,13 +333,22 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
 
   useEffect(() => {
     window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [handleKeyPress]);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+      // Clear all drying timeouts when the component unmounts or handleKeyPress changes
+      dryingTimeoutsRef.current.forEach(timeoutId => clearTimeout(timeoutId));
+      dryingTimeoutsRef.current.clear();
+    };
+  }, [handleKeyPress]); // ensure handleKeyPress has all dependencies, esp. dryCharacter
 
   useEffect(() => {
     const intervalId = setInterval(() => setCursorBlinkVisible((v) => !v), 500);
     return () => clearInterval(intervalId);
   }, []);
+
+  // Ensure dryCharacter is part of handleKeyPress's dependency array if it changes
+  // This might require further memoization of handleKeyPress or its parts.
+  // For now, assuming dryCharacter is stable due to useCallback.
 
   const paperContent = allLines.map((lineChars, lineIdx) => (
     <div
@@ -304,7 +357,7 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
       style={{ minHeight: `${lineHeight}px` }}
     >
       {lineChars.map((charObj) => (
-        <CaractereFrappe key={charObj.id} char={charObj.char} />
+        <CaractereFrappe key={charObj.id} char={charObj.char} state={charObj.state} />
       ))}
     </div>
   ));

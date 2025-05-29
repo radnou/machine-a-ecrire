@@ -1,8 +1,28 @@
+/* Attempting overwrite with ink drying styles */
 .caractere-frappe {
   display: inline-block;
-  color: #000;
+  /* Base "dried" styles can be set here or in .inkDried */
+  color: #333333; /* Default to dried color */
+  font-weight: normal; /* Default to dried weight */
+  text-shadow: none; /* Default to no shadow */
+  transition: color 0.75s ease-out, font-weight 0.75s ease-out, text-shadow 0.75s ease-out;
+  /* Preserve existing properties if any, e.g., from GSAP positioning */
+  position: relative; /* If GSAP uses y for positioning */
 }
 
 .caractere-frappe.space {
-  /* Styles si besoin */
+  /* Specific styles for space if needed, e.g., to ensure it has width */
+  /* Using &nbsp; in the component is generally better for width */
+}
+
+.inkFresh {
+  color: #000000; /* Darker for fresh ink */
+  font-weight: 700; /* Bolder for fresh ink */
+  text-shadow: 0 0 1px rgba(0,0,0,0.3); /* Subtle shadow for fresh ink */
+}
+
+.inkDried {
+  color: #333333; /* Regular "dried" ink color */
+  font-weight: normal; /* Regular font weight */
+  text-shadow: none; /* No shadow for dried ink */
 }
