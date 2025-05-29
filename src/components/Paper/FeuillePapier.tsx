@@ -335,11 +335,18 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
     window.addEventListener("keydown", handleKeyPress);
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
-      // Clear all drying timeouts when the component unmounts or handleKeyPress changes
+      // Only remove the event listener here. Timeout cleanup will be separate.
+    };
+  }, [handleKeyPress]); 
+
+  // Effect for unmount cleanup of all drying timeouts
+  useEffect(() => {
+    return () => {
       dryingTimeoutsRef.current.forEach(timeoutId => clearTimeout(timeoutId));
       dryingTimeoutsRef.current.clear();
+      // console.log("FeuillePapier unmounted, all drying timeouts cleared."); // For actual debugging
     };
-  }, [handleKeyPress]); // ensure handleKeyPress has all dependencies, esp. dryCharacter
+  }, []); // Empty dependency array means this runs only on unmount
 
   useEffect(() => {
     const intervalId = setInterval(() => setCursorBlinkVisible((v) => !v), 500);
@@ -357,7 +364,7 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
       style={{ minHeight: `${lineHeight}px` }}
     >
       {lineChars.map((charObj) => (
-        <CaractereFrappe key={charObj.id} char={charObj.char} state={charObj.state} />
+        <CaractereFrappe key={charObj.id} char={charObj.char} state={charObj.state} charId={charObj.id} />
       ))}
     </div>
   ));
