@@ -13,7 +13,10 @@ export interface RadioPlayerConfig {
 
 export type PlaybackState = 'IDLE' | 'PLAYING' | 'PAUSED'; // Simplified for now
 
-export type OnRadioStateChangeCallback = (newState: PlaybackState, currentStream?: RadioStream) => void;
+export type OnRadioStateChangeCallback = (
+  newState: PlaybackState,
+  currentStream?: RadioStream
+) => void;
 export type OnRadioStreamChangeCallback = (newStream: RadioStream) => void;
 export type OnRadioVolumeChangeCallback = (newVolume: number) => void;
 export type OnRadioErrorCallback = (error: string, streamUrl?: string) => void;
@@ -47,10 +50,11 @@ export class RadioPlayer {
   ) {
     this.config = config;
     this.streams = config.streams || [];
-    this.volume = typeof config.initialVolume === 'number' 
-      ? Math.max(MIN_VOLUME, Math.min(MAX_VOLUME, config.initialVolume)) 
-      : DEFAULT_VOLUME;
-    
+    this.volume =
+      typeof config.initialVolume === 'number'
+        ? Math.max(MIN_VOLUME, Math.min(MAX_VOLUME, config.initialVolume))
+        : DEFAULT_VOLUME;
+
     this.onStateChange = callbacks.onStateChange;
     this.onStreamChange = callbacks.onStreamChange;
     this.onVolumeChange = callbacks.onVolumeChange;
@@ -80,13 +84,15 @@ export class RadioPlayer {
   }
 
   public play(streamUrl?: string): void {
-    console.log(`[RadioPlayer] play called. Url: ${streamUrl}, Current Stream: ${this.currentStream?.url}, State: ${this.playbackState}`);
-    
+    console.log(
+      `[RadioPlayer] play called. Url: ${streamUrl}, Current Stream: ${this.currentStream?.url}, State: ${this.playbackState}`
+    );
+
     const initialStreamUrlBeforePlay = this.currentStream?.url;
     let streamChangedViaUrlArg = false;
 
     if (streamUrl) {
-      const targetIndex = this.streams.findIndex(s => s.url === streamUrl);
+      const targetIndex = this.streams.findIndex((s) => s.url === streamUrl);
       if (targetIndex === -1) {
         this.onError(`Stream URL not found: ${streamUrl}`, streamUrl);
         return;
@@ -102,15 +108,19 @@ export class RadioPlayer {
       this._setStreamByIndex(0); // Sets currentStream, currentStreamIndex, calls onStreamChange
       streamChangedViaUrlArg = true; // Technically the stream "changed" from null to stream[0]
     }
-    
+
     if (!this.currentStream) {
-      this.onError("No stream selected or available to play.");
+      this.onError('No stream selected or available to play.');
       return;
     }
 
     // If state is not PLAYING, or if the stream was just changed by this play() call,
     // then update state to PLAYING and notify.
-    if (this.playbackState !== 'PLAYING' || streamChangedViaUrlArg || this.currentStream.url !== initialStreamUrlBeforePlay) {
+    if (
+      this.playbackState !== 'PLAYING' ||
+      streamChangedViaUrlArg ||
+      this.currentStream.url !== initialStreamUrlBeforePlay
+    ) {
       this.playbackState = 'PLAYING';
       this.onStateChange(this.playbackState, this.currentStream);
     }
@@ -124,7 +134,7 @@ export class RadioPlayer {
       console.log(`[RadioPlayer] Paused: ${this.currentStream?.name}`);
     }
   }
-  
+
   /**
    * Selects a stream by its URL. If found, sets it as current, calls onStreamChange,
    * and sets playbackState to IDLE, calling onStateChange.
@@ -132,7 +142,7 @@ export class RadioPlayer {
    * @returns True if stream was found and selected, false otherwise.
    */
   public selectStream(streamUrl: string): boolean {
-    const index = this.streams.findIndex(s => s.url === streamUrl);
+    const index = this.streams.findIndex((s) => s.url === streamUrl);
     if (index === -1) {
       this.onError(`Stream URL not found: ${streamUrl}`, streamUrl);
       return false;
@@ -145,8 +155,11 @@ export class RadioPlayer {
 
     this.playbackState = 'IDLE';
     // Notify state change if state changed OR if stream changed (even if state was already IDLE)
-    if (oldPlaybackState !== 'IDLE' || oldStreamUrl !== this.currentStream?.url) {
-        this.onStateChange(this.playbackState, this.currentStream);
+    if (
+      oldPlaybackState !== 'IDLE' ||
+      oldStreamUrl !== this.currentStream?.url
+    ) {
+      this.onStateChange(this.playbackState, this.currentStream);
     }
     return true;
   }
@@ -155,25 +168,29 @@ export class RadioPlayer {
     if (this.streams.length === 0) return;
     let newIndex = (this.currentStreamIndex + 1) % this.streams.length;
     if (this.currentStreamIndex === -1 && this.streams.length > 0) {
-        newIndex = 0;
+      newIndex = 0;
     }
-    
+
     const oldStreamUrl = this.currentStream?.url;
     const oldPlaybackState = this.playbackState;
     this._setStreamByIndex(newIndex); // This calls onStreamChange if stream is different
 
     this.playbackState = 'IDLE';
-    if (oldPlaybackState !== 'IDLE' || oldStreamUrl !== this.currentStream?.url) {
-        this.onStateChange(this.playbackState, this.currentStream);
+    if (
+      oldPlaybackState !== 'IDLE' ||
+      oldStreamUrl !== this.currentStream?.url
+    ) {
+      this.onStateChange(this.playbackState, this.currentStream);
     }
     console.log(`[RadioPlayer] Next Stream: ${this.currentStream?.name}`);
   }
 
   public previousStream(): void {
     if (this.streams.length === 0) return;
-    let newIndex = (this.currentStreamIndex - 1 + this.streams.length) % this.streams.length;
-     if (this.currentStreamIndex === -1 && this.streams.length > 0) {
-        newIndex = 0; 
+    let newIndex =
+      (this.currentStreamIndex - 1 + this.streams.length) % this.streams.length;
+    if (this.currentStreamIndex === -1 && this.streams.length > 0) {
+      newIndex = 0;
     }
 
     const oldStreamUrl = this.currentStream?.url;
@@ -181,8 +198,11 @@ export class RadioPlayer {
     this._setStreamByIndex(newIndex); // This calls onStreamChange if stream is different
 
     this.playbackState = 'IDLE';
-    if (oldPlaybackState !== 'IDLE' || oldStreamUrl !== this.currentStream?.url) {
-        this.onStateChange(this.playbackState, this.currentStream);
+    if (
+      oldPlaybackState !== 'IDLE' ||
+      oldStreamUrl !== this.currentStream?.url
+    ) {
+      this.onStateChange(this.playbackState, this.currentStream);
     }
     console.log(`[RadioPlayer] Previous Stream: ${this.currentStream?.name}`);
   }

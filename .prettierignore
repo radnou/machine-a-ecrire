@@ -1,0 +1,10 @@
+# Ignore artifacts
+dist/
+packages/*/dist/
+
+# Ignore dependencies
+node_modules/
+packages/*/node_modules/
+
+# Coverage
+coverage/

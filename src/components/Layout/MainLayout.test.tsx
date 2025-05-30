@@ -13,7 +13,6 @@ import TopMenu from '../TopBar/TopMenu'; // Will be the mock
 import BottomBar from '../StatusBar/BottomBar'; // Will be the mock
 import FeuillePapier from '../Paper/FeuillePapier'; // Will be the mock (default export)
 
-
 vi.mock('../TopBar/TopMenu', () => {
   const capturedOnFileOpened = vi.fn();
   const MockComponent = vi.fn((props) => {
@@ -23,7 +22,9 @@ vi.mock('../TopBar/TopMenu', () => {
     return (
       <div data-testid="mock-top-menu">
         <button onClick={() => props.onToggleLeftSidebar()}>ToggleLeft</button>
-        <button onClick={() => props.onToggleRightSidebar()}>ToggleRight</button>
+        <button onClick={() => props.onToggleRightSidebar()}>
+          ToggleRight
+        </button>
       </div>
     );
   });
@@ -49,7 +50,8 @@ vi.mock('../StatusBar/BottomBar', () => ({
 }));
 
 vi.mock('../Paper/FeuillePapier', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('../Paper/FeuillePapier')>();
+  const actual =
+    await importOriginal<typeof import('../Paper/FeuillePapier')>();
   const capturedOnTextChange = vi.fn();
   const MockComponent = vi.fn((props) => {
     (MockComponent as any).capturedOnTextChange = capturedOnTextChange;
@@ -68,7 +70,6 @@ vi.mock('../Paper/FeuillePapier', async (importOriginal) => {
   };
 });
 
-
 // --- Test Suite ---
 describe('MainLayout Component', () => {
   beforeEach(() => {
@@ -86,10 +87,20 @@ describe('MainLayout Component', () => {
 
   it('handleTextChange updates counts correctly', () => {
     render(<MainLayout />);
-    
+
     const sampleLines: FeuilleCharObjectActual[][] = [
-      [{ id: '1', char: 'h' }, { id: '2', char: 'i' }, { id: '3', char: ' ' }],
-      [{ id: '4', char: 'w' }, { id: '5', char: 'o' }, { id: '6', char: 'r' }, { id: '7', char: 'l' }, { id: '8', char: 'd' }],
+      [
+        { id: '1', char: 'h' },
+        { id: '2', char: 'i' },
+        { id: '3', char: ' ' },
+      ],
+      [
+        { id: '4', char: 'w' },
+        { id: '5', char: 'o' },
+        { id: '6', char: 'r' },
+        { id: '7', char: 'l' },
+        { id: '8', char: 'd' },
+      ],
       [{ id: '9', char: '\n' }],
     ];
 
@@ -100,17 +111,18 @@ describe('MainLayout Component', () => {
     });
 
     const bottomBarMockCalls = (BottomBar as vi.Mock).mock.calls;
-    const lastBottomBarProps = bottomBarMockCalls[bottomBarMockCalls.length - 1][0];
+    const lastBottomBarProps =
+      bottomBarMockCalls[bottomBarMockCalls.length - 1][0];
     expect(lastBottomBarProps.charCount).toBe(9); // Corrected: "hi world " (newline->space) is 9 chars
-    expect(lastBottomBarProps.wordCount).toBe(2); 
+    expect(lastBottomBarProps.wordCount).toBe(2);
     expect(lastBottomBarProps.spaceCount).toBe(1);
   });
 
   it('handleFileOpened updates content, path, and FeuillePapier key', () => {
     render(<MainLayout />);
 
-    const sampleContent = "Hello World from file!";
-    const samplePath = "/path/to/file.txt";
+    const sampleContent = 'Hello World from file!';
+    const samplePath = '/path/to/file.txt';
 
     const capturedCallbackOnFileOpened = (TopMenu as any).capturedOnFileOpened;
     expect(capturedCallbackOnFileOpened).toBeDefined();
@@ -119,7 +131,8 @@ describe('MainLayout Component', () => {
     });
 
     const bottomBarMockCalls = (BottomBar as vi.Mock).mock.calls;
-    const lastBottomBarProps = bottomBarMockCalls[bottomBarMockCalls.length - 1][0];
+    const lastBottomBarProps =
+      bottomBarMockCalls[bottomBarMockCalls.length - 1][0];
     expect(lastBottomBarProps.charCount).toBe(sampleContent.length);
     expect(lastBottomBarProps.wordCount).toBe(4);
     expect(lastBottomBarProps.spaceCount).toBe(3);
@@ -131,6 +144,6 @@ describe('MainLayout Component', () => {
     // We've already checked that currentFilePath related states (counts) are updated.
     // We can also check that FeuillePapier was re-rendered (i.e. the mock function was called again)
     // The first call is on initial render. The second after onFileOpened.
-    expect(feuillePapierMockCalls.length).toBeGreaterThanOrEqual(2); 
+    expect(feuillePapierMockCalls.length).toBeGreaterThanOrEqual(2);
   });
 });

@@ -2,6 +2,10 @@
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.node.json" }
+    { "path": "./tsconfig.node.json" },
+    { "path": "./packages/electron-main" },
+    { "path": "./packages/renderer" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/shared" }
   ]
 }

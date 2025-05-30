@@ -1,6 +1,14 @@
 import React from 'react';
 import { render, screen, cleanup } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll } from 'vitest';
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+} from 'vitest';
 // Note: CaractereFrappe is now imported dynamically later
 import gsap from 'gsap'; // Import gsap to have its type, it will be mocked
 
@@ -18,7 +26,7 @@ vi.mock('gsap', async (importOriginal) => {
 
   return {
     ...actualGsap,
-    default: { 
+    default: {
       timeline: mockTimelineFunc,
       utils: { ...actualGsap.utils, random: mockRandomFunc },
     },
@@ -44,7 +52,6 @@ const mockAudioInstance = {
 const MockAudioConstructor = vi.fn(() => mockAudioInstance);
 vi.stubGlobal('Audio', MockAudioConstructor); // Stub global Audio constructor
 
-
 describe('CaractereFrappe Component', () => {
   // Dynamically import CaractereFrappe
   let CaractereFrappe: React.FC<{ char: string; state: 'fresh' | 'dried' }>;
@@ -58,15 +65,15 @@ describe('CaractereFrappe Component', () => {
   // beforeEach and afterEach will remain the same or be slightly adjusted if needed
 
   beforeEach(() => {
-    vi.clearAllMocks(); 
+    vi.clearAllMocks();
     mockAudioInstancePlay.mockClear();
     mockAudioInstancePause.mockClear();
     mockAudioInstanceLoad.mockClear();
     mockAudioInstance.src = '';
     mockAudioInstance.currentTime = 0;
-    mockTimelineInstance.set.mockClear(); 
-    mockTimelineInstance.to.mockClear();   
-    
+    mockTimelineInstance.set.mockClear();
+    mockTimelineInstance.to.mockClear();
+
     // If gsap.timeline or gsap.utils.random are used directly and are vi.fn(), clear them.
     if (vi.isMockFunction(gsap.timeline)) {
       (gsap.timeline as vi.Mock).mockClear();
@@ -75,7 +82,7 @@ describe('CaractereFrappe Component', () => {
       (gsap.utils.random as vi.Mock).mockClear();
     }
     // Clear the Audio constructor mock if needed for specific tests (e.g. to check number of instantiations)
-    // MockAudioConstructor.mockClear(); 
+    // MockAudioConstructor.mockClear();
   });
 
   // afterEach remains the same
@@ -104,15 +111,15 @@ describe('CaractereFrappe Component', () => {
     expect(mockTimelineInstance.to).toHaveBeenCalled();
     expect(gsap.utils.random).toHaveBeenCalled();
   });
-  
+
   it('attempts to play sound via GSAP timeline onComplete hook', () => {
     render(<CaractereFrappe char="C" state="fresh" />);
-    
+
     expect(gsap.timeline).toHaveBeenCalledTimes(1);
     const timelineOptions = (gsap.timeline as vi.Mock).mock.calls[0][0];
     expect(timelineOptions).toBeDefined();
     expect(timelineOptions.onComplete).toBeInstanceOf(Function);
-    
+
     if (timelineOptions.onComplete) {
       timelineOptions.onComplete();
     }

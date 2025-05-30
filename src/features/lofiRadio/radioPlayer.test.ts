@@ -13,9 +13,9 @@ import {
 } from './radioPlayer';
 
 const STREAMS_MOCK: RadioStream[] = [
-  { name: "Chilled Cow", url: "chilledcow.pls", genre: "Lofi" },
-  { name: "Coffee Beats", url: "coffee.pls", genre: "Jazz Hop" },
-  { name: "Synthwave FM", url: "synthwave.fm", genre: "Retrowave" },
+  { name: 'Chilled Cow', url: 'chilledcow.pls', genre: 'Lofi' },
+  { name: 'Coffee Beats', url: 'coffee.pls', genre: 'Jazz Hop' },
+  { name: 'Synthwave FM', url: 'synthwave.fm', genre: 'Retrowave' },
 ];
 
 const TEST_CONFIG: RadioPlayerConfig = {
@@ -52,19 +52,18 @@ describe('RadioPlayer', () => {
     expect(mockOnStreamChange).not.toHaveBeenCalled();
     expect(mockOnVolumeChange).not.toHaveBeenCalled(); // Volume is set, but callback only on change by setVolume
   });
-  
+
   it('should initialize with default volume 0.5 if not provided', () => {
     const configNoVolume: RadioPlayerConfig = { streams: STREAMS_MOCK };
     // Correctly pass callback functions with matching keys
-    const playerNoVolume = new RadioPlayer(configNoVolume, { 
-        onStateChange: mockOnStateChange, 
-        onStreamChange: mockOnStreamChange, 
-        onVolumeChange: mockOnVolumeChange, 
-        onError: mockOnError 
+    const playerNoVolume = new RadioPlayer(configNoVolume, {
+      onStateChange: mockOnStateChange,
+      onStreamChange: mockOnStreamChange,
+      onVolumeChange: mockOnVolumeChange,
+      onError: mockOnError,
     });
     expect(playerNoVolume.getVolume()).toBe(0.5);
   });
-
 
   describe('play()', () => {
     it('should play the first stream if no stream is current and no URL is provided', () => {
@@ -72,7 +71,10 @@ describe('RadioPlayer', () => {
       expect(player.getPlaybackState()).toBe('PLAYING');
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
       expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[0]);
-      expect(mockOnStateChange).toHaveBeenCalledWith('PLAYING', STREAMS_MOCK[0]);
+      expect(mockOnStateChange).toHaveBeenCalledWith(
+        'PLAYING',
+        STREAMS_MOCK[0]
+      );
     });
 
     it('should play the specified stream by URL', () => {
@@ -80,12 +82,18 @@ describe('RadioPlayer', () => {
       expect(player.getPlaybackState()).toBe('PLAYING');
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
       expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]); // from selectStream via play
-      expect(mockOnStateChange).toHaveBeenCalledWith('PLAYING', STREAMS_MOCK[1]); // from play
+      expect(mockOnStateChange).toHaveBeenCalledWith(
+        'PLAYING',
+        STREAMS_MOCK[1]
+      ); // from play
     });
 
     it('should call onError if playing an invalid stream URL', () => {
-      player.play("invalid.url");
-      expect(mockOnError).toHaveBeenCalledWith("Stream URL not found: invalid.url", "invalid.url");
+      player.play('invalid.url');
+      expect(mockOnError).toHaveBeenCalledWith(
+        'Stream URL not found: invalid.url',
+        'invalid.url'
+      );
       expect(player.getPlaybackState()).toBe('IDLE'); // Should remain IDLE or current state if already playing something else
     });
 
@@ -93,19 +101,22 @@ describe('RadioPlayer', () => {
       player.play(STREAMS_MOCK[0].url); // Play first stream
       player.pause(); // Pause it
       expect(player.getPlaybackState()).toBe('PAUSED');
-      
+
       player.play(); // Resume (no URL)
       expect(player.getPlaybackState()).toBe('PLAYING');
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
       // onStateChange should be called for PLAYING state
-      expect(mockOnStateChange).toHaveBeenLastCalledWith('PLAYING', STREAMS_MOCK[0]);
+      expect(mockOnStateChange).toHaveBeenLastCalledWith(
+        'PLAYING',
+        STREAMS_MOCK[0]
+      );
     });
-    
+
     it('should do nothing if already playing the current stream and play() is called again', () => {
       player.play(STREAMS_MOCK[0].url);
       mockOnStateChange.mockClear();
       mockOnStreamChange.mockClear();
-      
+
       player.play(); // Call play again without args
       expect(mockOnStateChange).not.toHaveBeenCalled();
       expect(mockOnStreamChange).not.toHaveBeenCalled();
@@ -113,26 +124,34 @@ describe('RadioPlayer', () => {
     });
 
     it('should switch and play if called with a different stream URL while already playing', () => {
-        player.play(STREAMS_MOCK[0].url); // Playing stream 0
-        expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
-        
-        player.play(STREAMS_MOCK[1].url); // Play stream 1
-        expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
-        expect(player.getPlaybackState()).toBe('PLAYING');
-        expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]);
-        expect(mockOnStateChange).toHaveBeenLastCalledWith('PLAYING', STREAMS_MOCK[1]);
-      });
+      player.play(STREAMS_MOCK[0].url); // Playing stream 0
+      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
+
+      player.play(STREAMS_MOCK[1].url); // Play stream 1
+      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
+      expect(player.getPlaybackState()).toBe('PLAYING');
+      expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]);
+      expect(mockOnStateChange).toHaveBeenLastCalledWith(
+        'PLAYING',
+        STREAMS_MOCK[1]
+      );
+    });
 
     it('should handle playing with an empty stream list', () => {
-        const emptyPlayer = new RadioPlayer({ streams: [] }, { 
-            onStateChange: mockOnStateChange, 
-            onStreamChange: mockOnStreamChange, 
-            onVolumeChange: mockOnVolumeChange, 
-            onError: mockOnError 
-        });
-        emptyPlayer.play();
-        expect(mockOnError).toHaveBeenCalledWith("No stream selected or available to play.");
-        expect(emptyPlayer.getPlaybackState()).toBe('IDLE');
+      const emptyPlayer = new RadioPlayer(
+        { streams: [] },
+        {
+          onStateChange: mockOnStateChange,
+          onStreamChange: mockOnStreamChange,
+          onVolumeChange: mockOnVolumeChange,
+          onError: mockOnError,
+        }
+      );
+      emptyPlayer.play();
+      expect(mockOnError).toHaveBeenCalledWith(
+        'No stream selected or available to play.'
+      );
+      expect(emptyPlayer.getPlaybackState()).toBe('IDLE');
     });
   });
 
@@ -147,7 +166,7 @@ describe('RadioPlayer', () => {
     it('should do nothing if already PAUSED or IDLE', () => {
       player.pause(); // Currently IDLE
       expect(mockOnStateChange).not.toHaveBeenCalled();
-      
+
       player.play(STREAMS_MOCK[0].url); // PLAYING
       player.pause(); // PAUSED
       mockOnStateChange.mockClear();
@@ -166,20 +185,26 @@ describe('RadioPlayer', () => {
     });
 
     it('should call onError if selecting an invalid stream URL', () => {
-      player.selectStream("invalid.url");
-      expect(mockOnError).toHaveBeenCalledWith("Stream URL not found: invalid.url", "invalid.url");
+      player.selectStream('invalid.url');
+      expect(mockOnError).toHaveBeenCalledWith(
+        'Stream URL not found: invalid.url',
+        'invalid.url'
+      );
       expect(player.getCurrentStream()).toBeNull(); // No stream should be selected
     });
 
     it('should change stream and go to IDLE if playing', () => {
-        player.play(STREAMS_MOCK[0].url); // Playing stream 0
-        player.selectStream(STREAMS_MOCK[1].url); // Select stream 1
-        
-        expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
-        expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]);
-        expect(player.getPlaybackState()).toBe('IDLE');
-        expect(mockOnStateChange).toHaveBeenLastCalledWith('IDLE', STREAMS_MOCK[1]);
-      });
+      player.play(STREAMS_MOCK[0].url); // Playing stream 0
+      player.selectStream(STREAMS_MOCK[1].url); // Select stream 1
+
+      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
+      expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]);
+      expect(player.getPlaybackState()).toBe('IDLE');
+      expect(mockOnStateChange).toHaveBeenLastCalledWith(
+        'IDLE',
+        STREAMS_MOCK[1]
+      );
+    });
   });
 
   describe('nextStream() / previousStream()', () => {
@@ -188,10 +213,10 @@ describe('RadioPlayer', () => {
       player.nextStream();
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[1]);
       expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[1]);
-      
+
       player.nextStream();
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[2]);
-      
+
       player.nextStream(); // Loop
       expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
       // All these should set state to IDLE
@@ -201,39 +226,48 @@ describe('RadioPlayer', () => {
     it('should select the previous stream and loop', () => {
       player.selectStream(STREAMS_MOCK[0].url); // Current is 0
       player.previousStream(); // Loop to last
-      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[STREAMS_MOCK.length - 1]);
-      expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[STREAMS_MOCK.length - 1]);
-      
+      expect(player.getCurrentStream()).toBe(
+        STREAMS_MOCK[STREAMS_MOCK.length - 1]
+      );
+      expect(mockOnStreamChange).toHaveBeenCalledWith(
+        STREAMS_MOCK[STREAMS_MOCK.length - 1]
+      );
+
       player.previousStream();
-      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[STREAMS_MOCK.length - 2]);
+      expect(player.getCurrentStream()).toBe(
+        STREAMS_MOCK[STREAMS_MOCK.length - 2]
+      );
       expect(player.getPlaybackState()).toBe('IDLE');
     });
-    
+
     it('nextStream should select first stream if none selected', () => {
-        player.nextStream();
-        expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
-        expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[0]);
-        expect(player.getPlaybackState()).toBe('IDLE');
+      player.nextStream();
+      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]);
+      expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[0]);
+      expect(player.getPlaybackState()).toBe('IDLE');
     });
 
     it('previousStream should select first stream if none selected (could also be last)', () => {
-        player.previousStream();
-        expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]); // Or STREAMS_MOCK[STREAMS_MOCK.length-1] based on preference
-        expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[0]);
-        expect(player.getPlaybackState()).toBe('IDLE');
+      player.previousStream();
+      expect(player.getCurrentStream()).toBe(STREAMS_MOCK[0]); // Or STREAMS_MOCK[STREAMS_MOCK.length-1] based on preference
+      expect(mockOnStreamChange).toHaveBeenCalledWith(STREAMS_MOCK[0]);
+      expect(player.getPlaybackState()).toBe('IDLE');
     });
 
     it('should do nothing if stream list is empty', () => {
-        const emptyPlayer = new RadioPlayer({ streams: [] }, { 
-            onStateChange: mockOnStateChange, 
-            onStreamChange: mockOnStreamChange, 
-            onVolumeChange: mockOnVolumeChange, 
-            onError: mockOnError 
-        });
-        emptyPlayer.nextStream();
-        expect(emptyPlayer.getCurrentStream()).toBeNull();
-        emptyPlayer.previousStream();
-        expect(emptyPlayer.getCurrentStream()).toBeNull();
+      const emptyPlayer = new RadioPlayer(
+        { streams: [] },
+        {
+          onStateChange: mockOnStateChange,
+          onStreamChange: mockOnStreamChange,
+          onVolumeChange: mockOnVolumeChange,
+          onError: mockOnError,
+        }
+      );
+      emptyPlayer.nextStream();
+      expect(emptyPlayer.getCurrentStream()).toBeNull();
+      emptyPlayer.previousStream();
+      expect(emptyPlayer.getCurrentStream()).toBeNull();
     });
   });
 
@@ -258,9 +292,9 @@ describe('RadioPlayer', () => {
     });
 
     it('should not call onVolumeChange if volume is not changed', () => {
-        const currentVolume = player.getVolume();
-        player.setVolume(currentVolume);
-        expect(mockOnVolumeChange).not.toHaveBeenCalled();
+      const currentVolume = player.getVolume();
+      player.setVolume(currentVolume);
+      expect(mockOnVolumeChange).not.toHaveBeenCalled();
     });
   });
 });

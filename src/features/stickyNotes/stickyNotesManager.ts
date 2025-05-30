@@ -3,8 +3,9 @@
 export interface StickyNote {
   id: string;
   content: string;
-  color?: string;        // e.g., hex code like '#FFFF00'
-  position?: {           // Optional: position on a canvas/board
+  color?: string; // e.g., hex code like '#FFFF00'
+  position?: {
+    // Optional: position on a canvas/board
     x: number;
     y: number;
   };
@@ -51,7 +52,7 @@ export class StickyNotesManager {
    * @returns An array of StickyNote objects.
    */
   public getAllNotes(): StickyNote[] {
-    return Array.from(this.notes.values()).map(note => ({ ...note })); // Return copies
+    return Array.from(this.notes.values()).map((note) => ({ ...note })); // Return copies
   }
 
   /**
@@ -61,7 +62,11 @@ export class StickyNotesManager {
    * @param newColor Optional new color for the note.
    * @returns The updated StickyNote object if found and updated, otherwise null.
    */
-  public updateNote(id: string, newContent: string, newColor?: string): StickyNote | null {
+  public updateNote(
+    id: string,
+    newContent: string,
+    newColor?: string
+  ): StickyNote | null {
     const note = this.notes.get(id);
     if (note) {
       const updatedNote: StickyNote = {
@@ -91,7 +96,10 @@ export class StickyNotesManager {
    * @param position The new position {x, y}.
    * @returns The updated StickyNote object if found, otherwise null.
    */
-  public setNotePosition(id: string, position: { x: number; y: number }): StickyNote | null {
+  public setNotePosition(
+    id: string,
+    position: { x: number; y: number }
+  ): StickyNote | null {
     const note = this.notes.get(id);
     if (note) {
       const updatedNote: StickyNote = {

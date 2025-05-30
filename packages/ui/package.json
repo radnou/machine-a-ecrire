@@ -1,0 +1,11 @@
+{
+  "name": "@monorepo/ui",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo 'Linting @monorepo/ui'",
+    "test": "echo 'Testing @monorepo/ui'",
+    "build": "tsc --project tsconfig.json"
+  }
+}

@@ -1,10 +1,10 @@
-import React from "react";
-import "./TopMenu.css";
+import React from 'react';
+import './TopMenu.css';
 import {
   openFileDialog,
   saveFileDialog,
   openFolderDialog,
-} from "../../services/fileSystemAPI";
+} from '../../services/fileSystemAPI';
 
 interface TopMenuProps {
   onToggleLeftSidebar: () => void;
@@ -27,14 +27,14 @@ const TopMenu: React.FC<TopMenuProps> = ({
     const file = await openFileDialog();
     if (file) {
       onFileOpened(file.content, file.path);
-      console.log("Fichier ouvert:", file.path);
+      console.log('Fichier ouvert:', file.path);
     }
   };
 
   const handleOpenFolder = async () => {
     const files = await openFolderDialog();
     if (files) {
-      console.log("Dossier ouvert, fichiers:", files);
+      console.log('Dossier ouvert, fichiers:', files);
       // Logique pour afficher ces fichiers dans LeftSidebar
     }
   };
@@ -43,7 +43,7 @@ const TopMenu: React.FC<TopMenuProps> = ({
     // TODO: Obtenir le chemin actuel du fichier s'il existe
     const savedPath = await saveFileDialog(currentFileContent, undefined);
     if (savedPath) {
-      console.log("Fichier sauvegardé:", savedPath);
+      console.log('Fichier sauvegardé:', savedPath);
       // TODO: Mettre à jour l'état du fichier actuel avec le nouveau chemin
     }
   };
@@ -53,9 +53,9 @@ const TopMenu: React.FC<TopMenuProps> = ({
       <div className="sidebar-toggles">
         <button
           onClick={onToggleLeftSidebar}
-          title={isLeftSidebarVisible ? "Masquer Gauche" : "Afficher Gauche"}
+          title={isLeftSidebarVisible ? 'Masquer Gauche' : 'Afficher Gauche'}
         >
-          {isLeftSidebarVisible ? "⬅️" : "➡️"}
+          {isLeftSidebarVisible ? '⬅️' : '➡️'}
         </button>
       </div>
 
@@ -77,9 +77,9 @@ const TopMenu: React.FC<TopMenuProps> = ({
       <div className="sidebar-toggles">
         <button
           onClick={onToggleRightSidebar}
-          title={isRightSidebarVisible ? "Masquer Droite" : "Afficher Droite"}
+          title={isRightSidebarVisible ? 'Masquer Droite' : 'Afficher Droite'}
         >
-          {isRightSidebarVisible ? "➡️" : "⬅️"}
+          {isRightSidebarVisible ? '➡️' : '⬅️'}
         </button>
       </div>
     </div>
