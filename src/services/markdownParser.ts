@@ -20,14 +20,12 @@ export interface CharObject {
  */
 export function charObjectsToMarkdown(lines: CharObject[][]): string {
   if (!lines || lines.length === 0) {
-    return "";
+    return '';
   }
 
   // Identical to charObjectsToString for this basic version
   return lines
-    .map(lineArray => 
-      lineArray.map(charObj => charObj.char).join('')
-    )
+    .map((lineArray) => lineArray.map((charObj) => charObj.char).join(''))
     .join('\n');
 }
 
@@ -41,20 +39,22 @@ export function charObjectsToMarkdown(lines: CharObject[][]): string {
  */
 export function markdownToCharObjects(markdown: string): CharObject[][] {
   // If the input string is empty, represent it as a document with one empty line.
-  if (markdown === "") {
+  if (markdown === '') {
     return [[]];
   }
 
   // Identical to stringToCharObjects for this basic version
   const lines = markdown.split('\n');
-  return lines.map(lineString => {
-    if (lineString === "") {
+  return lines.map((lineString) => {
+    if (lineString === '') {
       return []; // Represent an empty line as an empty array of CharObjects
     }
-    return lineString.split('').map((charStr): CharObject => ({
-      id: `char-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      char: charStr,
-      state: 'dried', // Default to 'dried' when converting from Markdown text
-    }));
+    return lineString.split('').map(
+      (charStr): CharObject => ({
+        id: `char-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        char: charStr,
+        state: 'dried', // Default to 'dried' when converting from Markdown text
+      })
+    );
   });
 }

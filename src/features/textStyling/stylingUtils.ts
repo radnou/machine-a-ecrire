@@ -20,12 +20,15 @@ export type TextStyleType = 'bold' | 'italic' | 'underline';
  * @param style - The style type to toggle ('bold', 'italic', or 'underline').
  * @returns A new array of StyledCharObject with the style toggled.
  */
-export function toggleStyle(chars: StyledCharObject[], style: TextStyleType): StyledCharObject[] {
+export function toggleStyle(
+  chars: StyledCharObject[],
+  style: TextStyleType
+): StyledCharObject[] {
   if (!chars || chars.length === 0) {
     return [];
   }
 
-  return chars.map(charObj => {
+  return chars.map((charObj) => {
     const newCharObj = { ...charObj };
     switch (style) {
       case 'bold':
@@ -53,16 +56,21 @@ export function toggleStyle(chars: StyledCharObject[], style: TextStyleType): St
  * @param color - The highlight color string to apply. If undefined, removes the highlight.
  * @returns A new array of StyledCharObject with the highlight color applied or removed.
  */
-export function applyHighlight(chars: StyledCharObject[], color?: string): StyledCharObject[] {
+export function applyHighlight(
+  chars: StyledCharObject[],
+  color?: string
+): StyledCharObject[] {
   if (!chars || chars.length === 0) {
     return [];
   }
 
-  return chars.map(charObj => {
+  return chars.map((charObj) => {
     const newCharObj = { ...charObj };
-    if (typeof color === 'string') { // Includes empty string, which could be a valid "no color" state or an actual color
+    if (typeof color === 'string') {
+      // Includes empty string, which could be a valid "no color" state or an actual color
       newCharObj.highlightColor = color;
-    } else if (color === undefined) { // Explicitly remove if color is undefined
+    } else if (color === undefined) {
+      // Explicitly remove if color is undefined
       // To truly remove the property vs setting it to undefined: delete newCharObj.highlightColor;
       // However, setting to undefined is often sufficient and simpler.
       // Let's ensure the property is removed if color is undefined, as per "removes the highlightColor property".

@@ -1,0 +1,11 @@
+{
+  "name": "@monorepo/renderer",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo 'Linting @monorepo/renderer'",
+    "test": "echo 'Testing @monorepo/renderer'",
+    "build": "tsc --project tsconfig.json"
+  }
+}

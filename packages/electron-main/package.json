@@ -1,0 +1,11 @@
+{
+  "name": "@monorepo/electron-main",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "lint": "echo 'Linting @monorepo/electron-main'",
+    "test": "echo 'Testing @monorepo/electron-main'",
+    "build": "tsc --project tsconfig.json"
+  }
+}

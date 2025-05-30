@@ -18,65 +18,120 @@ describe('VirtualKeyboard Component', () => {
 
   describe('Visibility Control', () => {
     it('renders the keyboard when isVisible is true', () => {
-      const { container } = render(<VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />);
+      const { container } = render(
+        <VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />
+      );
       // The main div has the class .keyboardContainer
       // querySelector can find it using the generated class name
-      expect(container.querySelector(`.${styles.keyboardContainer}`)).toBeInTheDocument();
+      expect(
+        container.querySelector(`.${styles.keyboardContainer}`)
+      ).toBeInTheDocument();
     });
 
     it('does not render the keyboard when isVisible is false', () => {
-      const { container } = render(<VirtualKeyboard isVisible={false} onKeyPress={mockOnKeyPress} />);
-      expect(container.querySelector(`.${styles.keyboardContainer}`)).not.toBeInTheDocument();
+      const { container } = render(
+        <VirtualKeyboard isVisible={false} onKeyPress={mockOnKeyPress} />
+      );
+      expect(
+        container.querySelector(`.${styles.keyboardContainer}`)
+      ).not.toBeInTheDocument();
       // Since the component returns null, the container itself should be empty
       expect(container.firstChild).toBeNull();
     });
   });
 
   describe('Key Press Interaction', () => {
-    const keysToTest = ['A', 'Z', 'E', 'Q', 'S', 'W', 'X', 'Space', 'Enter', 'Backspace', 'Shift', 'P', 'M', 'N'];
+    const keysToTest = [
+      'A',
+      'Z',
+      'E',
+      'Q',
+      'S',
+      'W',
+      'X',
+      'Space',
+      'Enter',
+      'Backspace',
+      'Shift',
+      'P',
+      'M',
+      'N',
+    ];
 
     keysToTest.forEach((keyText) => {
       it(`calls onKeyPress with "${keyText}" when the "${keyText}" key is clicked`, () => {
-        render(<VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />);
-        
+        render(
+          <VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />
+        );
+
         // Find button by its text content. This assumes the text content uniquely identifies the key.
         const keyButton = screen.getByText(keyText);
         fireEvent.click(keyButton);
-        
+
         expect(mockOnKeyPress).toHaveBeenCalledTimes(1);
         expect(mockOnKeyPress).toHaveBeenCalledWith(keyText);
       });
     });
 
     it('calls onKeyPress multiple times for multiple key clicks', () => {
-        render(<VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />);
-        
-        const keyA = screen.getByText('A');
-        const keyB = screen.getByText('B');
-        const keySpace = screen.getByText('Space');
+      render(<VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />);
 
-        fireEvent.click(keyA);
-        expect(mockOnKeyPress).toHaveBeenCalledWith('A');
-        
-        fireEvent.click(keyB);
-        expect(mockOnKeyPress).toHaveBeenCalledWith('B');
+      const keyA = screen.getByText('A');
+      const keyB = screen.getByText('B');
+      const keySpace = screen.getByText('Space');
 
-        fireEvent.click(keySpace);
-        expect(mockOnKeyPress).toHaveBeenCalledWith('Space');
+      fireEvent.click(keyA);
+      expect(mockOnKeyPress).toHaveBeenCalledWith('A');
 
-        expect(mockOnKeyPress).toHaveBeenCalledTimes(3);
+      fireEvent.click(keyB);
+      expect(mockOnKeyPress).toHaveBeenCalledWith('B');
+
+      fireEvent.click(keySpace);
+      expect(mockOnKeyPress).toHaveBeenCalledWith('Space');
+
+      expect(mockOnKeyPress).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('Layout/Key Rendering (Basic)', () => {
-    const expectedKeys = ['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', 
-                           'Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M',
-                           'W', 'X', 'C', 'V', 'B', 'N',
-                           'Shift', 'Backspace', 'Enter', 'Space'];
+    const expectedKeys = [
+      'A',
+      'Z',
+      'E',
+      'R',
+      'T',
+      'Y',
+      'U',
+      'I',
+      'O',
+      'P',
+      'Q',
+      'S',
+      'D',
+      'F',
+      'G',
+      'H',
+      'J',
+      'K',
+      'L',
+      'M',
+      'W',
+      'X',
+      'C',
+      'V',
+      'B',
+      'N',
+      'Shift',
+      'Backspace',
+      'Enter',
+      'Space',
+    ];
 
     expectedKeys.forEach((keyText) => {
       it(`renders the "${keyText}" key`, () => {
-        render(<VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />);
+        render(
+          <VirtualKeyboard isVisible={true} onKeyPress={mockOnKeyPress} />
+        );
         expect(screen.getByText(keyText)).toBeInTheDocument();
       });
     });

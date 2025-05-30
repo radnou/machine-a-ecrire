@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "outDir": "dist",
+    "rootDir": "src",
+    "baseUrl": ".", // Needed for paths to work relative to this tsconfig
+    "paths": {
+      "@monorepo/shared": ["../shared/dist/index"],
+      "@monorepo/shared/*": ["../shared/dist/*"]
+    },
+    "esModuleInterop": true, // Recommended for compatibility
+    "skipLibCheck": true, // Can be useful in monorepos
+    "module": "commonjs", // Or ESNext, depending on the target environment
+    "target": "es2020", // Or newer
+    "composite": true, // Important for project references
+    "declaration": true // Generate .d.ts files
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"],
+  "references": [{ "path": "../shared" }]
+}

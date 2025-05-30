@@ -6,7 +6,10 @@ interface VirtualKeyboardProps {
   onKeyPress: (key: string) => void;
 }
 
-const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({ isVisible, onKeyPress }) => {
+const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
+  isVisible,
+  onKeyPress,
+}) => {
   const row1 = ['A', 'Z', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'];
   const row2 = ['Q', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', 'M'];
   const row3 = ['W', 'X', 'C', 'V', 'B', 'N']; // Shift might go here or on its own row
@@ -29,54 +32,66 @@ const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({ isVisible, onKeyPress
     <div className={styles.keyboardContainer}>
       <div className={styles.keyboardRow}>
         {row1.map((key) => (
-          <button key={key} className={styles.keyButton} onClick={() => handleKeyClick(key)}>
+          <button
+            key={key}
+            className={styles.keyButton}
+            onClick={() => handleKeyClick(key)}
+          >
             {key}
           </button>
         ))}
       </div>
       <div className={styles.keyboardRow}>
         {row2.map((key) => (
-          <button key={key} className={styles.keyButton} onClick={() => handleKeyClick(key)}>
+          <button
+            key={key}
+            className={styles.keyButton}
+            onClick={() => handleKeyClick(key)}
+          >
             {key}
           </button>
         ))}
       </div>
       <div className={styles.keyboardRow}>
         {/* Example of adding a special key like Shift to a row */}
-        <button 
-            key="ShiftLeft" 
-            className={`${styles.keyButton} ${styles.shiftKey}`} 
-            onClick={() => handleKeyClick('Shift')}
+        <button
+          key="ShiftLeft"
+          className={`${styles.keyButton} ${styles.shiftKey}`}
+          onClick={() => handleKeyClick('Shift')}
         >
-            Shift
+          Shift
         </button>
         {row3.map((key) => (
-          <button key={key} className={styles.keyButton} onClick={() => handleKeyClick(key)}>
+          <button
+            key={key}
+            className={styles.keyButton}
+            onClick={() => handleKeyClick(key)}
+          >
             {key}
           </button>
         ))}
-         <button 
-            key="Backspace" 
-            className={`${styles.keyButton} ${styles.backspaceKey}`} 
-            onClick={() => handleKeyClick('Backspace')}
+        <button
+          key="Backspace"
+          className={`${styles.keyButton} ${styles.backspaceKey}`}
+          onClick={() => handleKeyClick('Backspace')}
         >
-            Backspace
+          Backspace
         </button>
       </div>
       <div className={styles.keyboardRow}>
-        <button 
-            key="Enter" 
-            className={`${styles.keyButton} ${styles.enterKey}`} 
-            onClick={() => handleKeyClick('Enter')}
+        <button
+          key="Enter"
+          className={`${styles.keyButton} ${styles.enterKey}`}
+          onClick={() => handleKeyClick('Enter')}
         >
-            Enter
+          Enter
         </button>
-        <button 
-            key="Space" 
-            className={`${styles.keyButton} ${styles.spaceKey}`} 
-            onClick={() => handleKeyClick('Space')}
+        <button
+          key="Space"
+          className={`${styles.keyButton} ${styles.spaceKey}`}
+          onClick={() => handleKeyClick('Space')}
         >
-            Space
+          Space
         </button>
         {/* Other utility keys can be added here or arranged differently */}
       </div>

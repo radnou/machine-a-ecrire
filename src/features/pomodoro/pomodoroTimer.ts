@@ -1,17 +1,24 @@
 // src/features/pomodoro/pomodoroTimer.ts
 
 export interface PomodoroConfig {
-  workDuration: number;         // in seconds
-  shortBreakDuration: number;   // in seconds
-  longBreakDuration: number;    // in seconds
-  longBreakInterval: number;    // number of work cycles before a long break
+  workDuration: number; // in seconds
+  shortBreakDuration: number; // in seconds
+  longBreakDuration: number; // in seconds
+  longBreakInterval: number; // number of work cycles before a long break
 }
 
 export type PomodoroState = 'IDLE' | 'WORK' | 'SHORT_BREAK' | 'LONG_BREAK';
 
 export type OnTickCallback = (currentTime: number) => void;
-export type OnStateChangeCallback = (newState: PomodoroState, currentCycle: number, newDuration: number) => void;
-export type OnPeriodEndCallback = (endedState: PomodoroState, currentCycle: number) => void;
+export type OnStateChangeCallback = (
+  newState: PomodoroState,
+  currentCycle: number,
+  newDuration: number
+) => void;
+export type OnPeriodEndCallback = (
+  endedState: PomodoroState,
+  currentCycle: number
+) => void;
 
 export class PomodoroTimer {
   private config: PomodoroConfig;
@@ -63,7 +70,7 @@ export class PomodoroTimer {
         return this.config.workDuration; // Default to work duration for initial setup if IDLE
     }
   }
-  
+
   private _startPeriod(state: PomodoroState): void {
     if (this.intervalId) {
       clearInterval(this.intervalId);
@@ -71,9 +78,13 @@ export class PomodoroTimer {
     this._isPaused = false;
     this._currentState = state;
     this._currentTimeInSeconds = this._getDurationForState(state);
-    
+
     // Notify state change
-    this.onStateChange(this._currentState, this._currentCycle, this._currentTimeInSeconds);
+    this.onStateChange(
+      this._currentState,
+      this._currentCycle,
+      this._currentTimeInSeconds
+    );
     this.onTick(this._currentTimeInSeconds); // Initial tick for the new period
 
     if (state !== 'IDLE') {
@@ -86,7 +97,7 @@ export class PomodoroTimer {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
-    
+
     const endedState = this._currentState;
     let cycleForCallback = this._currentCycle;
 
@@ -94,18 +105,22 @@ export class PomodoroTimer {
       this._currentCycle++; // Increment first
       cycleForCallback = this._currentCycle; // Use the updated cycle for the callback
     }
-    
+
     this.onPeriodEnd(endedState, cycleForCallback); // Pass the correct cycle number
 
     let nextState: PomodoroState;
     if (endedState === 'WORK') {
       // _currentCycle is already incremented
-      if (this._currentCycle > 0 && (this._currentCycle % this.config.longBreakInterval === 0)) {
+      if (
+        this._currentCycle > 0 &&
+        this._currentCycle % this.config.longBreakInterval === 0
+      ) {
         nextState = 'LONG_BREAK';
       } else {
         nextState = 'SHORT_BREAK';
       }
-    } else { // SHORT_BREAK or LONG_BREAK
+    } else {
+      // SHORT_BREAK or LONG_BREAK
       nextState = 'WORK';
       // Cycle management for starting new work after break:
       // If currentCycle means "completed work periods in this set leading to long break",
@@ -128,23 +143,30 @@ export class PomodoroTimer {
       // _startPeriod will increment cycle for WORK if it's the first one.
       // No, _endCurrentPeriod increments cycle. So, WORK starts with currentCycle.
       // Let's make WORK period increment the cycle at its start if coming from break/idle
-      if (this._currentState === 'IDLE' || this._currentState === 'SHORT_BREAK' || this._currentState === 'LONG_BREAK') {
-         // Starting a new work session, effectively.
-         // If we want currentCycle to mean "upcoming work cycle number", then increment here.
-         // If it means "completed work cycles for this set", it's incremented in _endCurrentPeriod.
-         // Let's stick to _currentCycle = completed work periods.
-         // So, if IDLE, the first WORK period is part of cycle 1 (which completes at WORK end).
-         // If we reset cycles upon starting from IDLE:
-         // this._currentCycle = 0; // This is already the default for a new instance or after full reset.
+      if (
+        this._currentState === 'IDLE' ||
+        this._currentState === 'SHORT_BREAK' ||
+        this._currentState === 'LONG_BREAK'
+      ) {
+        // Starting a new work session, effectively.
+        // If we want currentCycle to mean "upcoming work cycle number", then increment here.
+        // If it means "completed work cycles for this set", it's incremented in _endCurrentPeriod.
+        // Let's stick to _currentCycle = completed work periods.
+        // So, if IDLE, the first WORK period is part of cycle 1 (which completes at WORK end).
+        // If we reset cycles upon starting from IDLE:
+        // this._currentCycle = 0; // This is already the default for a new instance or after full reset.
       }
       this._startPeriod('WORK');
     } else if (this._isPaused) {
       this._isPaused = false;
       // Resume: start the interval again without changing time or state
-      if (this._currentState !== 'IDLE') { // Should not be IDLE if paused, but as a safeguard
+      if (this._currentState !== 'IDLE') {
+        // Should not be IDLE if paused, but as a safeguard
         this.intervalId = setInterval(() => this._tick(), 1000);
         // Optional: notify of resume if needed, e.g. onStateChange(this._currentState, this._currentCycle, this._currentTimeInSeconds, true /* resumed */);
-        console.log(`[PomodoroTimer] Resumed: ${this._currentState} at ${this._currentTimeInSeconds}s, cycle ${this._currentCycle}`);
+        console.log(
+          `[PomodoroTimer] Resumed: ${this._currentState} at ${this._currentTimeInSeconds}s, cycle ${this._currentCycle}`
+        );
       }
     }
     // If already running and not paused, start() does nothing.
@@ -155,7 +177,9 @@ export class PomodoroTimer {
       clearInterval(this.intervalId);
       this.intervalId = null;
       this._isPaused = true;
-      console.log(`[PomodoroTimer] Paused: ${this._currentState} at ${this._currentTimeInSeconds}s, cycle ${this._currentCycle}`);
+      console.log(
+        `[PomodoroTimer] Paused: ${this._currentState} at ${this._currentTimeInSeconds}s, cycle ${this._currentCycle}`
+      );
       // Optional: notify of pause, e.g. onStateChange(this._currentState, this._currentCycle, this._currentTimeInSeconds, false /* running */, true /* paused */);
     }
   }
@@ -170,9 +194,14 @@ export class PomodoroTimer {
     this._currentState = 'IDLE';
     this._currentCycle = 0; // Reset cycles
     this._currentTimeInSeconds = this.config.workDuration; // Reset time to initial work duration
-    
-    if (previousState !== 'IDLE') { // Only call onStateChange if it actually changed to IDLE
-        this.onStateChange(this._currentState, this._currentCycle, this._currentTimeInSeconds);
+
+    if (previousState !== 'IDLE') {
+      // Only call onStateChange if it actually changed to IDLE
+      this.onStateChange(
+        this._currentState,
+        this._currentCycle,
+        this._currentTimeInSeconds
+      );
     }
     this.onTick(this._currentTimeInSeconds); // Reflect reset time
     console.log('[PomodoroTimer] Reset to IDLE.');
@@ -180,12 +209,19 @@ export class PomodoroTimer {
 
   public skip(): void {
     if (this._currentState !== 'IDLE') {
-      console.log(`[PomodoroTimer] Skipping period: ${this._currentState}, cycle ${this._currentCycle}`);
+      console.log(
+        `[PomodoroTimer] Skipping period: ${this._currentState}, cycle ${this._currentCycle}`
+      );
       this._endCurrentPeriod(); // This will handle transitions and start the next period
     }
   }
 
-  public getCurrentState(): { state: PomodoroState; time: number; cycle: number; isPaused: boolean } {
+  public getCurrentState(): {
+    state: PomodoroState;
+    time: number;
+    cycle: number;
+    isPaused: boolean;
+  } {
     return {
       state: this._currentState,
       time: this._currentTimeInSeconds,

@@ -1,0 +1,12 @@
+{
+  "name": "@monorepo/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "lint": "echo 'Linting @monorepo/shared'",
+    "test": "echo 'Testing @monorepo/shared'",
+    "build": "tsc --project tsconfig.json"
+  }
+}

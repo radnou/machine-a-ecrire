@@ -10,12 +10,12 @@ import {
 
 // Helper to create StyledCharObject for tests
 const createChar = (
-  id: string, 
-  char: string, 
+  id: string,
+  char: string,
   state: 'fresh' | 'dried' = 'dried',
-  isBold = false, 
-  isItalic = false, 
-  isUnderline = false, 
+  isBold = false,
+  isItalic = false,
+  isUnderline = false,
   highlightColor?: string
 ): StyledCharObject => ({
   id,
@@ -84,7 +84,7 @@ describe('Text Styling Utilities', () => {
     it('should return new array and new character objects (immutability)', () => {
       const original: StyledCharObject[] = [createChar('id1', 'a')];
       const styled = toggleStyle(original, 'bold');
-      
+
       expect(styled).not.toBe(original); // New array
       expect(styled[0]).not.toBe(original[0]); // New char object
       expect(styled[0].isBold).toBe(true);
@@ -118,19 +118,19 @@ describe('Text Styling Utilities', () => {
       expect(unhighlighted[0].highlightColor).toBeUndefined();
       expect(unhighlighted[1].highlightColor).toBeUndefined(); // Blue highlight removed
     });
-    
+
     it('should handle applying an empty string as a color', () => {
-        // The function `applyHighlight` sets `highlightColor = color` if color is a string.
-        // An empty string is a string.
-        const highlightedWithEmpty = applyHighlight(initialChars, ""); 
-        expect(highlightedWithEmpty[0].highlightColor).toBe("");
-        expect(highlightedWithEmpty[1].highlightColor).toBe("");
-      });
+      // The function `applyHighlight` sets `highlightColor = color` if color is a string.
+      // An empty string is a string.
+      const highlightedWithEmpty = applyHighlight(initialChars, '');
+      expect(highlightedWithEmpty[0].highlightColor).toBe('');
+      expect(highlightedWithEmpty[1].highlightColor).toBe('');
+    });
 
     it('should return new array and new character objects (immutability)', () => {
       const original: StyledCharObject[] = [createChar('id1', 'a')];
       const highlighted = applyHighlight(original, 'yellow');
-      
+
       expect(highlighted).not.toBe(original); // New array
       expect(highlighted[0]).not.toBe(original[0]); // New char object
       expect(highlighted[0].highlightColor).toBe('yellow');

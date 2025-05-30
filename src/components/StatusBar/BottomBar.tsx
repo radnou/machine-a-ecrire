@@ -1,5 +1,5 @@
-import React from "react";
-import "./BottomBar.css";
+import React from 'react';
+import './BottomBar.css';
 
 interface BottomBarProps {
   charCount: number;

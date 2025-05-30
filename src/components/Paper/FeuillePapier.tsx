@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import CaractereFrappe from "../CaractereFrappe";
-import "./PaperStyles.css";
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import CaractereFrappe from '../CaractereFrappe';
+import './PaperStyles.css';
 
 const CHARACTER_WIDTH_ESTIMATE_PX = 10.5;
 const LINE_HEIGHT_PX = 28;
@@ -13,9 +13,9 @@ const FIXED_CURSOR_VIEWPORT_X_PERCENT = 50;
 const FIXED_CURSOR_VIEWPORT_Y_PERCENT = 30;
 
 const CHARS_IN_BELL_ZONE = 7;
-const BELL_SOUND_SRC = "/sounds/typewriter-bell.mp3";
+const BELL_SOUND_SRC = '/sounds/typewriter-bell.mp3';
 const bellSound =
-  typeof Audio !== "undefined" ? new Audio(BELL_SOUND_SRC) : null;
+  typeof Audio !== 'undefined' ? new Audio(BELL_SOUND_SRC) : null;
 
 export interface CharObject {
   id: string;
@@ -55,27 +55,30 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
 
   // Function to update a character's state to 'dried'
-  const dryCharacter = useCallback((charId: string) => {
-    setAllLines((prevAllLines) => {
-      let charFoundAndUpdated = false;
-      const newAllLines = prevAllLines.map(line =>
-        line.map(charObj => {
-          if (charObj.id === charId && charObj.state === 'fresh') {
-            charFoundAndUpdated = true;
-            return { ...charObj, state: 'dried' as 'dried' };
-          }
-          return charObj;
-        })
-      );
-      if (charFoundAndUpdated && onTextChange) {
-        // Optional: notify parent about this specific type of change if needed
-        // For now, onTextChange is primarily for text content, not just state updates
-        // Consider if a separate callback for state changes is ever needed
-      }
-      return charFoundAndUpdated ? newAllLines : prevAllLines;
-    });
-    dryingTimeoutsRef.current.delete(charId);
-  }, [onTextChange]); // Added onTextChange to dependencies, though not strictly used in current logic for state update
+  const dryCharacter = useCallback(
+    (charId: string) => {
+      setAllLines((prevAllLines) => {
+        let charFoundAndUpdated = false;
+        const newAllLines = prevAllLines.map((line) =>
+          line.map((charObj) => {
+            if (charObj.id === charId && charObj.state === 'fresh') {
+              charFoundAndUpdated = true;
+              return { ...charObj, state: 'dried' as 'dried' };
+            }
+            return charObj;
+          })
+        );
+        if (charFoundAndUpdated && onTextChange) {
+          // Optional: notify parent about this specific type of change if needed
+          // For now, onTextChange is primarily for text content, not just state updates
+          // Consider if a separate callback for state changes is ever needed
+        }
+        return charFoundAndUpdated ? newAllLines : prevAllLines;
+      });
+      dryingTimeoutsRef.current.delete(charId);
+    },
+    [onTextChange]
+  ); // Added onTextChange to dependencies, though not strictly used in current logic for state update
 
   const [cursorBlinkVisible, setCursorBlinkVisible] = useState(true);
   const [bellRungForThisLine, setBellRungForThisLine] = useState(false);
@@ -167,7 +170,7 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
 
       if (event.key.length === 1) {
         if (currentLineChars.length >= PAPER_CONTENT_CHARS_WIDE) {
-          console.log("Fin de ligne atteinte, input bloqué.");
+          console.log('Fin de ligne atteinte, input bloqué.');
           return;
         }
         const charId = `char-${Date.now()}-${Math.random()}`;
@@ -203,12 +206,12 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
             bellSound
               .play()
               .catch((error) =>
-                console.error("Erreur lecture son clochette:", error)
+                console.error('Erreur lecture son clochette:', error)
               );
           }
           setBellRungForThisLine(true);
         }
-      } else if (event.key === "Backspace") {
+      } else if (event.key === 'Backspace') {
         if (currentLineChars.length > 0) {
           const removedChar = currentLineChars.pop();
           if (removedChar && dryingTimeoutsRef.current.has(removedChar.id)) {
@@ -228,7 +231,7 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
             setBellRungForThisLine(false);
           }
         }
-      } else if (event.key === "Enter") {
+      } else if (event.key === 'Enter') {
         setCurrentLineIndex((prevIndex) => prevIndex + 1);
         newAllLinesState = [...newAllLinesState, []];
 
@@ -273,9 +276,9 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
 
   useEffect(() => {
     if (initialContent) {
-      const lines = initialContent.split("\n");
+      const lines = initialContent.split('\n');
       const newAllLinesData: CharObject[][] = lines.map((line) =>
-        line.split("").map((char) => ({
+        line.split('').map((char) => ({
           id: `loaded-${Date.now()}-${Math.random()}`,
           char,
           state: 'dried' as 'dried', // Initial content is considered dried
@@ -332,17 +335,17 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
   }, [initialContent, charWidth, lineHeight, mainContentRef, onTextChange]);
 
   useEffect(() => {
-    window.addEventListener("keydown", handleKeyPress);
+    window.addEventListener('keydown', handleKeyPress);
     return () => {
-      window.removeEventListener("keydown", handleKeyPress);
+      window.removeEventListener('keydown', handleKeyPress);
       // Only remove the event listener here. Timeout cleanup will be separate.
     };
-  }, [handleKeyPress]); 
+  }, [handleKeyPress]);
 
   // Effect for unmount cleanup of all drying timeouts
   useEffect(() => {
     return () => {
-      dryingTimeoutsRef.current.forEach(timeoutId => clearTimeout(timeoutId));
+      dryingTimeoutsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
       dryingTimeoutsRef.current.clear();
       // console.log("FeuillePapier unmounted, all drying timeouts cleared."); // For actual debugging
     };
@@ -364,7 +367,12 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
       style={{ minHeight: `${lineHeight}px` }}
     >
       {lineChars.map((charObj) => (
-        <CaractereFrappe key={charObj.id} char={charObj.char} state={charObj.state} charId={charObj.id} />
+        <CaractereFrappe
+          key={charObj.id}
+          char={charObj.char}
+          state={charObj.state}
+          charId={charObj.id}
+        />
       ))}
     </div>
   ));
@@ -373,17 +381,17 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
     <>
       <div
         style={{
-          position: "absolute",
-          visibility: "hidden",
-          pointerEvents: "none",
+          position: 'absolute',
+          visibility: 'hidden',
+          pointerEvents: 'none',
           fontFamily: '"Courier Prime", "Courier New", Courier, monospace',
-          fontSize: "1.1rem",
+          fontSize: '1.1rem',
         }}
       >
         <span ref={measureCharRef}>M</span>
         <div
           ref={measureLineRef}
-          style={{ lineHeight: "1.8", minHeight: "1.8rem" }}
+          style={{ lineHeight: '1.8', minHeight: '1.8rem' }}
         >
           TestLine
         </div>
@@ -393,10 +401,10 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
         className="feuille-papier-active-area"
         ref={mainContentRef}
         style={{
-          width: "100%",
-          height: "100%",
-          position: "relative",
-          overflow: "hidden",
+          width: '100%',
+          height: '100%',
+          position: 'relative',
+          overflow: 'hidden',
         }}
       >
         <div
@@ -417,10 +425,10 @@ const FeuillePapier: React.FC<FeuillePapierProps> = ({
             transform: `translate(${paperSheetX}px, ${paperSheetY}px)`,
             padding: `${PAPER_INITIAL_PADDING_PX}px`,
             fontFamily: '"Courier Prime", "Courier New", Courier, monospace',
-            fontSize: "1.1rem",
-            lineHeight: "1.8",
-            "--paper-initial-padding-px": `${PAPER_INITIAL_PADDING_PX}px`,
-            "--paper-margin-line-right-offset-px": "60px",
+            fontSize: '1.1rem',
+            lineHeight: '1.8',
+            '--paper-initial-padding-px': `${PAPER_INITIAL_PADDING_PX}px`,
+            '--paper-margin-line-right-offset-px': '60px',
           }}
         >
           {paperContent}

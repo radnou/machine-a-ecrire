@@ -5,4 +5,4 @@
 //   sendMessage: (message: string) => ipcRenderer.send('some-channel', message),
 // });
 
-console.log("Preload script chargé !");
+console.log('Preload script chargé !');

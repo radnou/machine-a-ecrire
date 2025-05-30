@@ -19,13 +19,11 @@ export interface CharObject {
  */
 export function charObjectsToString(lines: CharObject[][]): string {
   if (!lines || lines.length === 0) {
-    return "";
+    return '';
   }
 
   return lines
-    .map(lineArray => 
-      lineArray.map(charObj => charObj.char).join('')
-    )
+    .map((lineArray) => lineArray.map((charObj) => charObj.char).join(''))
     .join('\n');
 }
 
@@ -38,19 +36,21 @@ export function charObjectsToString(lines: CharObject[][]): string {
  */
 export function stringToCharObjects(text: string): CharObject[][] {
   // If the input string is empty, represent it as a document with one empty line.
-  if (text === "") {
+  if (text === '') {
     return [[]];
   }
 
   const lines = text.split('\n');
-  return lines.map(lineString => {
-    if (lineString === "") {
+  return lines.map((lineString) => {
+    if (lineString === '') {
       return []; // Represent an empty line as an empty array of CharObjects
     }
-    return lineString.split('').map((charStr): CharObject => ({
-      id: `char-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      char: charStr,
-      state: 'dried', // Default to 'dried' when converting from plain text
-    }));
+    return lineString.split('').map(
+      (charStr): CharObject => ({
+        id: `char-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        char: charStr,
+        state: 'dried', // Default to 'dried' when converting from plain text
+      })
+    );
   });
 }
